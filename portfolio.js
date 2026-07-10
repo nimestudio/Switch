@@ -85,10 +85,37 @@ const initPortfolioHover = () => {
 };
 
 // venues grid
-const initVenueMap = () => {
+let currentBucket = "";
+let gsapMedia = gsap.matchMedia();
+
+const getLayoutBucket = () => {
+  const w = window.innerWidth;
+  if (w > 1200) return "desktop";
+  if (w >= 768) return "tablet";
+  if (w >= 481) return "mobile-landscape";
+  return "mobile-portrait";
+};
+
+const buildGrid = () => {
   const stage = document.querySelector(".portfolio-venues-wrap");
   const sourceItems = document.querySelectorAll(".cms-venue-item");
   if (!stage || !sourceItems.length) return;
+
+  const bucket = getLayoutBucket();
+  currentBucket = bucket;
+
+  let cols = 10;
+  let rows = 3;
+
+  if (bucket === "tablet") {
+    cols = 8;
+    rows = 4;
+  } else if (bucket === "mobile-landscape" || bucket === "mobile-portrait") {
+    cols = 8;
+    rows = 5;
+  }
+
+  stage.querySelectorAll(".venue-view-grid").forEach(g => g.remove());
 
   const views = {};
   for (let i = 1; i <= 5; i++) {
@@ -123,9 +150,9 @@ const initVenueMap = () => {
     });
 
     const coordinates = [];
-    for (let row = 1; row <= 3; row++) {
-      for (let col = 1; col <= 10; col++) {
-        coordinates.push({ row, col });
+    for (let r = 1; r <= rows; r++) {
+      for (let c = 1; c <= cols; c++) {
+        coordinates.push({ row: r, col: c });
       }
     }
 
@@ -136,12 +163,19 @@ const initVenueMap = () => {
 
     const checkContiguity = (coord) => {
       const { row: r, col: c } = coord;
+      
       if (isOccupied(r, c - 1) && isOccupied(r, c - 2)) return false;
       if (isOccupied(r, c + 1) && isOccupied(r, c + 2)) return false;
       if (isOccupied(r, c - 1) && isOccupied(r, c + 1)) return false;
       if (isOccupied(r - 1, c) && isOccupied(r - 2, c)) return false;
       if (isOccupied(r + 1, c) && isOccupied(r + 2, c)) return false;
       if (isOccupied(r - 1, c) && isOccupied(r + 1, c)) return false;
+      
+      if (isOccupied(r, c + 1) && isOccupied(r + 1, c) && isOccupied(r + 1, c + 1)) return false;
+      if (isOccupied(r, c - 1) && isOccupied(r + 1, c - 1) && isOccupied(r + 1, c)) return false;
+      if (isOccupied(r - 1, c) && isOccupied(r, c + 1) && isOccupied(r - 1, c + 1)) return false;
+      if (isOccupied(r - 1, c - 1) && isOccupied(r - 1, c) && isOccupied(r, c - 1)) return false;
+      
       return true;
     };
 
@@ -149,13 +183,17 @@ const initVenueMap = () => {
       if (coordinates.length === 0) return;
 
       const validCoordinates = coordinates.filter(coord => {
+        if (coord.col === 1 || coord.col === cols) return false;
+        
         const noAdjacentHighlight = !placedHighlights.some(ph => {
           return (Math.abs(coord.row - ph.row) + Math.abs(coord.col - ph.col)) === 1;
         });
         return noAdjacentHighlight && checkContiguity(coord);
       });
 
-      const targetPool = validCoordinates.length > 0 ? validCoordinates : coordinates;
+      const targetPool = validCoordinates.length > 0 ? validCoordinates : coordinates.filter(c => c.col !== 1 && c.col !== cols);
+      if (targetPool.length === 0) return;
+      
       const randomIndex = Math.floor(Math.random() * targetPool.length);
       const chosenCoord = targetPool[randomIndex];
 
@@ -167,6 +205,40 @@ const initVenueMap = () => {
       card.style.gridRowStart = coords.row;
       card.style.gridColumnStart = coords.col;
     });
+
+    if (normalCards.length > 0) {
+      let col1Pool = coordinates.filter(c => c.col === 1 && checkContiguity(c));
+      if (col1Pool.length === 0) col1Pool = coordinates.filter(c => c.col === 1);
+      
+      if (col1Pool.length > 0) {
+        const card = normalCards.shift();
+        const randomIndex = Math.floor(Math.random() * col1Pool.length);
+        const chosenCoord = col1Pool[randomIndex];
+        const coordIndex = coordinates.findIndex(c => c.row === chosenCoord.row && c.col === chosenCoord.col);
+        const coords = coordinates.splice(coordIndex, 1)[0];
+        
+        placedAll.push(coords);
+        card.style.gridRowStart = coords.row;
+        card.style.gridColumnStart = coords.col;
+      }
+    }
+
+    if (normalCards.length > 0) {
+      let colMaxPool = coordinates.filter(c => c.col === cols && checkContiguity(c));
+      if (colMaxPool.length === 0) colMaxPool = coordinates.filter(c => c.col === cols);
+      
+      if (colMaxPool.length > 0) {
+        const card = normalCards.shift();
+        const randomIndex = Math.floor(Math.random() * colMaxPool.length);
+        const chosenCoord = colMaxPool[randomIndex];
+        const coordIndex = coordinates.findIndex(c => c.row === chosenCoord.row && c.col === chosenCoord.col);
+        const coords = coordinates.splice(coordIndex, 1)[0];
+        
+        placedAll.push(coords);
+        card.style.gridRowStart = coords.row;
+        card.style.gridColumnStart = coords.col;
+      }
+    }
 
     normalCards.forEach((card) => {
       if (coordinates.length === 0) return;
@@ -186,9 +258,10 @@ const initVenueMap = () => {
     });
   });
 
-  let mm = gsap.matchMedia();
+  gsapMedia.revert();
+  gsapMedia = gsap.matchMedia();
 
-  mm.add("(min-width: 991px)", () => {
+  gsapMedia.add("(min-width: 768px)", () => {
     const grids = gsap.utils.toArray(".venue-view-grid");
     gsap.set(grids, { opacity: 0, pointerEvents: "none" });
 
@@ -200,14 +273,28 @@ const initVenueMap = () => {
     });
   });
 
-  mm.add("(max-width: 990px)", () => {
+  gsapMedia.add("(max-width: 767px)", () => {
     gsap.set(".venue-view-grid", { opacity: 1, pointerEvents: "auto" });
   });
 };
 
+let resizeTimeout;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (getLayoutBucket() !== currentBucket) {
+      buildGrid();
+    }
+  }, 200);
+});
+
+document.addEventListener("DOMContentLoaded", buildGrid);
+
+// run
 const runPortfolio = () => {
   initPortfolioBackgrounds();
   initPortfolioHover();
+  buildGrid();
   initVenueMap();
 };
 

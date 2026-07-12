@@ -1,6 +1,47 @@
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// portfolio item hover bg
+// hero title loop
+const initPortfolioLoop = () => {
+  const changingSpan = document.querySelector(".portfolio-changing-chunk");
+  if (!changingSpan) return;
+
+  const wordsAttr = changingSpan.getAttribute("data-words");
+  if (!wordsAttr) return;
+
+  const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")];
+
+  gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
+
+  const tl = gsap.timeline({ repeat: -1 });
+
+  words.forEach((_, index) => {
+    const nextIndex = (index + 1) % words.length;
+
+    tl.to({}, { duration: 2 })
+      .to(changingSpan, {
+        yPercent: -100,
+        duration: 0.3,
+        ease: "power2.in"
+      })
+      .to(changingSpan, {
+        opacity: 0,
+        duration: 0.15,
+        ease: "linear"
+      }, "<")
+      .call(() => {
+        changingSpan.textContent = words[nextIndex];
+      })
+      .set(changingSpan, { yPercent: 100 })
+      .to(changingSpan, {
+        yPercent: 0,
+        opacity: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+  });
+};
+
+// assign color to portfolio list items
 const initPortfolioBackgrounds = () => {
   const items = document.querySelectorAll(".portfolio-item");
   const classes = [
@@ -19,75 +60,10 @@ const initPortfolioBackgrounds = () => {
   });
 };
 
-// portfolio items desktop hover animation
-const initPortfolioHover = () => {
-  const items = document.querySelectorAll(".portfolio-item");
-  if (!items.length) return;
-
-  let mm = gsap.matchMedia();
-
-  mm.add("(min-width: 991px)", () => {
-    gsap.set(".portfolio-item-img-wrap", { x: "20vw" });
-
-    items.forEach(item => {
-      const bg = item.querySelector(".portfolio-item-bg");
-      const details = item.querySelector(".portfolio-item-details");
-      const imgWrap = item.querySelector(".portfolio-item-img-wrap");
-      const isLime = bg && bg.classList.contains("background-color-lime");
-
-      item.addEventListener("mouseenter", () => {
-        gsap.to([bg, details], {
-          opacity: 1,
-          duration: 0.35,
-          overwrite: "auto"
-        });
-        
-        if (isLime) {
-          gsap.to(item, {
-            color: "var(--color--black)",
-            duration: 0.35,
-            overwrite: "auto"
-          });
-        }
-        
-        gsap.to(imgWrap, {
-          x: "0",
-          duration: 0.35,
-          ease: "power3.out",
-          overwrite: "auto"
-        });
-      });
-
-      item.addEventListener("mouseleave", () => {
-        gsap.to([bg, details], {
-          opacity: 0,
-          duration: 0.25,
-          overwrite: "auto"
-        });
-        
-        if (isLime) {
-          gsap.to(item, {
-            color: "",
-            duration: 0.25,
-            overwrite: "auto"
-          });
-        }
-        
-        gsap.to(imgWrap, {
-          x: "20vw",
-          duration: 0.25,
-          ease: "power3.out",
-          overwrite: "auto"
-        });
-      });
-    });
-  });
-};
-
-// venues grid
 let currentBucket = "";
 let gsapMedia = gsap.matchMedia();
 
+// venues grid slides
 const getLayoutBucket = () => {
   const w = window.innerWidth;
   if (w > 1200) return "desktop";
@@ -288,15 +264,12 @@ window.addEventListener("resize", () => {
   }, 200);
 });
 
-document.addEventListener("DOMContentLoaded", buildGrid);
-
-// run
 const runPortfolio = () => {
   initPortfolioBackgrounds();
-  initPortfolioHover();
   buildGrid();
-  initVenueMap();
 };
+
+document.addEventListener("heroRevealComplete", initPortfolioLoop);
 
 if (document.readyState === "loading") {
   window.addEventListener("DOMContentLoaded", runPortfolio);

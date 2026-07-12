@@ -1,3 +1,42 @@
+// global hero chunks stagger
+const initGlobalHeroReveal = () => {
+  if (document.querySelector(".preloader")) return;
+
+  const chunks = document.querySelectorAll(".heading-chunk");
+  if (!chunks.length) return;
+
+  const targetsToAnimate = [];
+
+  chunks.forEach(chunk => {
+    const textContent = chunk.innerHTML;
+    chunk.innerHTML = "";
+    
+    const innerWrapper = document.createElement("span");
+    innerWrapper.style.display = "block";
+    innerWrapper.innerHTML = textContent;
+    
+    chunk.style.clipPath = "inset(0% 0% 0% 0%)";
+    chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
+    
+    chunk.appendChild(innerWrapper);
+    targetsToAnimate.push(innerWrapper);
+  });
+
+  gsap.set(targetsToAnimate, { y: "130%" });
+  gsap.set(chunks, { opacity: 1 });
+
+  gsap.to(targetsToAnimate, {
+    y: "0%",
+    duration: 1,
+    stagger: 0.4,
+    ease: "power3.out",
+    onComplete: () => {
+      document.dispatchEvent(new CustomEvent("heroRevealComplete"));
+    }
+  });
+};
+
+// global text line reveal
 window.initLineReveal = () => {
   const targetElements = document.querySelectorAll("[data-text-animation='lines']");
   
@@ -9,8 +48,8 @@ window.initLineReveal = () => {
     split.lines.forEach(line => {
       const wrapper = document.createElement("div");
       wrapper.style.overflow = "hidden";
-      wrapper.style.padding = "0.2em";
-      wrapper.style.margin = "-0.2em";
+      wrapper.style.padding = "0.2em 0em";
+      wrapper.style.margin = "-0.2em 0em";
 
       line.parentNode.insertBefore(wrapper, line);
       wrapper.appendChild(line);
@@ -30,7 +69,10 @@ window.initLineReveal = () => {
   });
 };
 
+// global cta section
 const initCTAReveal = () => {
+  if (document.querySelector(".preloader")) return;
+
   const section = document.querySelector(".section-cta");
   if (!section) return;
 
@@ -115,12 +157,13 @@ const initCTAReveal = () => {
   }, "-=0.4");
 };
 
-window.addEventListener("DOMContentLoaded", () => {
+if (!document.querySelector(".preloader")) {
   window.initLineReveal();
-  window.initCTAReveal();
+}
+initCTAReveal();
+initGlobalHeroReveal();
 
-  const yearEl = document.querySelector("#current-year");
-  if (yearEl) {
-    yearEl.textContent = new Date().getFullYear();
-  }
-});
+const yearEl = document.querySelector("#current-year");
+if (yearEl) {
+  yearEl.textContent = new Date().getFullYear();
+}

@@ -1,6 +1,6 @@
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// services fading animation
+// services scroll fade
 const initServiceFade = () => {
   const blocks = gsap.utils.toArray(".service-block");
   
@@ -24,7 +24,7 @@ const initServiceFade = () => {
   });
 };
 
-// events scroll interaction
+// events scroll
 const initServicesScroll = () => {
   const blocks = document.querySelectorAll(".services-events-block");
   const photos = document.querySelectorAll(".services-events-photo");

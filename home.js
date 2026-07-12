@@ -1,7 +1,7 @@
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// Preloader
-const initPreloaderAndHero = () => {
+// preloader
+const PreloaderAndHero = () => {
   const logo = document.querySelector(".preloader-logo");
   const logoWrap = document.querySelector(".preloader-logo-wrap");
   const colorColumns = document.querySelectorAll(".preloader-color-column");
@@ -35,6 +35,7 @@ const initPreloaderAndHero = () => {
   });
 
   gsap.set(targetsToAnimate, { y: "130%" });
+  gsap.set(chunks, { opacity: 1 });
 
   const runHeroAnimation = () => {
     const heroTl = gsap.timeline();
@@ -117,7 +118,6 @@ const initPreloaderAndHero = () => {
   });
 };
 
-// Intro horizontal venues
 const lenis = new Lenis();
 
 lenis.on("scroll", ScrollTrigger.update);
@@ -128,7 +128,8 @@ gsap.ticker.add((time) => {
 
 gsap.ticker.lagSmoothing(0);
 
-const initHorizontalScroll = () => {
+// intro horizontal scroll
+const HorizontalScroll = () => {
   const section = document.querySelector(".section-home-intro");
   const track = document.querySelector(".scroll-track");
   const items = document.querySelectorAll(".scroll-item");
@@ -206,8 +207,8 @@ const initHorizontalScroll = () => {
   });
 };
 
-// steps blocks
-const initHomeSteps = () => {
+// steps
+const HomeSteps = () => {
   const wrapper = document.querySelector(".home-steps-wrap");
   if (!wrapper) return;
 
@@ -242,14 +243,78 @@ const initHomeSteps = () => {
 };
 
 // cta section reveal
+const HomeCTAReveal = () => {
+  const section = document.querySelector(".section-cta");
+  if (!section) return;
 
+  const columns = document.querySelectorAll(".image-reveal-column");
+  const textWrap = document.querySelector(".cta-reveal-text-wrap");
+  const button = document.querySelector(".section-cta .button");
+
+  if (columns.length < 5 || !textWrap) return;
+
+  gsap.set(columns[0], { height: "85%" });
+  gsap.set(columns[1], { height: "45%" });
+  gsap.set(columns[2], { height: "90%" });
+  gsap.set(columns[3], { height: "55%" });
+  gsap.set(columns[4], { height: "100%" });
+
+  const split = new SplitText(textWrap, { type: "lines" });
+  split.lines.forEach(line => {
+    const wrapper = document.createElement("div");
+    wrapper.style.overflow = "hidden";
+    wrapper.style.padding = "0.2em 0.05em";
+    wrapper.style.margin = "-0.2em -0.05em";
+    line.parentNode.insertBefore(wrapper, line);
+    wrapper.appendChild(line);
+  });
+  
+  gsap.set(split.lines, { y: "130%" });
+  gsap.set(button, { autoAlpha: 0 });
+
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: section,
+      start: "top bottom+=50%",
+      end: "top top",
+      scrub: true
+    }
+  })
+  .to(columns[4], { height: "0%", ease: "none", duration: 100 }, 0)
+  .to(columns[2], { height: "0%", ease: "none", duration: 100 }, 0)
+  .to(columns[0], { height: "0%", ease: "none", duration: 100 }, 0)
+  .to(columns[1], { height: "0%", ease: "none", duration: 100 }, 0)
+  .to(columns[3], { height: "0%", ease: "none", duration: 100 }, 0);
+
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: section,
+      start: "top 25%",
+      once: true
+    }
+  })
+  .to(split.lines, {
+    y: "0%",
+    duration: 1,
+    stagger: 0.3,
+    ease: "power3.out"
+  })
+  .to(button, {
+    autoAlpha: 1,
+    duration: 0.8,
+    ease: "power2.out"
+  }, "-=0.4");
+};
 
 const runHomeScripts = () => {
-  initPreloaderAndHero();
-  initHorizontalScroll();
-  initHomeSteps();
-  initCTAReveal();
-  initLineReveal();
+  PreloaderAndHero();
+  HorizontalScroll();
+  HomeSteps();
+  HomeCTAReveal();
+  
+  if (typeof window.initLineReveal === "function") {
+    window.initLineReveal();
+  }
 };
 
 if (document.readyState === "loading") {

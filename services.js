@@ -1,5 +1,30 @@
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
+// services fading animation
+const initServiceFade = () => {
+  const blocks = gsap.utils.toArray(".service-block");
+  
+  blocks.forEach((block, index) => {
+    if (index === blocks.length - 1) return;
+    
+    const content = block.querySelector(".service-content-wrap");
+    const nextBlock = blocks[index + 1];
+    
+    if (!content || !nextBlock) return;
+    
+    gsap.to(content, {
+      opacity: 0,
+      scrollTrigger: {
+        trigger: nextBlock,
+        start: "top bottom",
+        end: "top top",
+        scrub: true
+      }
+    });
+  });
+};
+
+// events scroll interaction
 const initServicesScroll = () => {
   const blocks = document.querySelectorAll(".services-events-block");
   const photos = document.querySelectorAll(".services-events-photo");
@@ -34,6 +59,7 @@ const initServicesScroll = () => {
 };
 
 const runService = () => {
+  initServiceFade();
   initServicesScroll();
 };
 

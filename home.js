@@ -7,6 +7,7 @@ const PreloaderAndHero = () => {
   const colorColumns = document.querySelectorAll(".preloader-color-column");
   const blackColumns = document.querySelectorAll(".preloader-black-column");
   const navbar = document.querySelector(".navbar");
+  const navItems = document.querySelectorAll(".nav-container > *");
   const heroSub = document.querySelector(".home-hero-sub p");
   const chunks = document.querySelectorAll(".heading-chunk");
 
@@ -14,7 +15,13 @@ const PreloaderAndHero = () => {
 
   gsap.set(logo, { y: "101%" });
   gsap.set(colorColumns, { height: "0%" });
-  gsap.set(navbar, { y: "-100%" });
+
+  if (navbar) {
+    gsap.set(navbar, { opacity: 0 });
+  }
+  if (navItems.length) {
+    gsap.set(navItems, { opacity: 0, y: 10 });
+  }
 
   let split;
   const targetsToAnimate = [];
@@ -40,24 +47,37 @@ const PreloaderAndHero = () => {
   const runHeroAnimation = () => {
     const heroTl = gsap.timeline();
 
-    heroTl
-      .to(targetsToAnimate, {
-        y: "0%",
+    heroTl.to(targetsToAnimate, {
+      y: "0%",
+      duration: 1,
+      stagger: 0.4,
+      ease: "power3.out"
+    });
+
+    if (navbar) {
+      heroTl.to(navbar, {
+        opacity: 1,
         duration: 1,
-        stagger: 0.4,
         ease: "power3.out"
-      })
-      .to(navbar, {
-        y: "0%",
-        duration: 1.5,
-        ease: "power2.inOut"
-      }, "<-0.2")
-      .to(split.lines, {
-        y: "0%",
-        duration: 1.5,
+      }, 0);
+    }
+
+    if (navItems.length) {
+      heroTl.to(navItems, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
         stagger: 0.1,
-        ease: "power2.inOut"
-      }, "<1");
+        ease: "power3.out"
+      }, 0);
+    }
+
+    heroTl.to(split.lines, {
+      y: "0%",
+      duration: 1.5,
+      stagger: 0.1,
+      ease: "power2.inOut"
+    }, 0.5);
   };
 
   const startColumnsAnimation = () => {

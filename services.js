@@ -1,30 +1,63 @@
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// services scroll fade
-const initServiceFade = () => {
-  const blocks = gsap.utils.toArray(".service-block");
+// services scroll
+const initServiceNavReveal = () => {
+  const blocks = document.querySelectorAll(".service-block");
+  const navItems = document.querySelectorAll(".service-block-topbar-block");
   
+  if (!blocks.length || navItems.length !== blocks.length) return;
+
+  const bgs = [];
+  navItems.forEach(item => {
+    const bg = item.querySelector(".topbar-bg");
+    if (bg) bgs.push(bg);
+  });
+
+  if (bgs.length !== blocks.length) return;
+
+  gsap.set(bgs, { opacity: 0 });
+
   blocks.forEach((block, index) => {
-    if (index === blocks.length - 1) return;
+    const currentBg = bgs[index];
+    const textElement = block.querySelector("[data-text-animation='lines-services']");
     
-    const content = block.querySelector(".service-content-wrap");
-    const nextBlock = blocks[index + 1];
-    
-    if (!content || !nextBlock) return;
-    
-    gsap.to(content, {
-      opacity: 0,
-      scrollTrigger: {
-        trigger: nextBlock,
-        start: "top bottom",
-        end: "top top",
-        scrub: true
-      }
+    const tl = gsap.timeline({ paused: true });
+
+    tl.to(currentBg, {
+      opacity: 1,
+      duration: 0.5,
+      ease: "power2.out"
+    }, 0);
+
+    if (textElement) {
+      const split = new SplitText(textElement, { type: "lines" });
+      split.lines.forEach(line => {
+        const wrapper = document.createElement("div");
+        wrapper.style.overflow = "hidden";
+        wrapper.style.padding = "0.2em 0em";
+        wrapper.style.margin = "-0.2em 0em";
+        line.parentNode.insertBefore(wrapper, line);
+        wrapper.appendChild(line);
+      });
+
+      tl.from(split.lines, {
+        yPercent: 130,
+        duration: 1,
+        ease: "power3.out",
+        stagger: 0.25,
+      }, 0.15);
+    }
+
+    ScrollTrigger.create({
+      trigger: block,
+      start: "top 25%",
+      toggleActions: "play none none reverse",
+      animation: tl
     });
   });
 };
 
-// events scroll
+// events categories scroll
 const initServicesScroll = () => {
   const blocks = document.querySelectorAll(".services-events-block");
   const photos = document.querySelectorAll(".services-events-photo");
@@ -59,7 +92,7 @@ const initServicesScroll = () => {
 };
 
 const runService = () => {
-  initServiceFade();
+  initServiceNavReveal();
   initServicesScroll();
 };
 

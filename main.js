@@ -1,39 +1,104 @@
-// global hero chunks stagger
+// global hero load
 const initGlobalHeroReveal = () => {
   if (document.querySelector(".preloader")) return;
 
-  const chunks = document.querySelectorAll(".heading-chunk");
-  if (!chunks.length) return;
+  const chunks = document.querySelectorAll("[data-hero-reveal='chunk']");
+  const navbar = document.querySelector(".navbar");
+  const navItems = document.querySelectorAll(".nav-container > *");
+  const imageReveal = document.querySelector("[data-hero-reveal='image-reveal']");
+  const serviceItems = document.querySelectorAll("[data-hero-reveal='service-number']");
 
-  const targetsToAnimate = [];
+  const hasElements = chunks.length || navbar || imageReveal || serviceItems.length;
+  if (!hasElements) return;
 
-  chunks.forEach(chunk => {
-    const textContent = chunk.innerHTML;
-    chunk.innerHTML = "";
-    
-    const innerWrapper = document.createElement("span");
-    innerWrapper.style.display = "block";
-    innerWrapper.innerHTML = textContent;
-    
-    chunk.style.clipPath = "inset(0% 0% 0% 0%)";
-    chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
-    
-    chunk.appendChild(innerWrapper);
-    targetsToAnimate.push(innerWrapper);
-  });
-
-  gsap.set(targetsToAnimate, { y: "130%" });
-  gsap.set(chunks, { opacity: 1 });
-
-  gsap.to(targetsToAnimate, {
-    y: "0%",
-    duration: 1,
-    stagger: 0.4,
-    ease: "power3.out",
+  const tl = gsap.timeline({
     onComplete: () => {
       document.dispatchEvent(new CustomEvent("heroRevealComplete"));
     }
   });
+
+  const targetsToAnimate = [];
+
+  if (chunks.length) {
+    chunks.forEach(chunk => {
+      const textContent = chunk.innerHTML;
+      chunk.innerHTML = "";
+      
+      const innerWrapper = document.createElement("span");
+      innerWrapper.style.display = "block";
+      innerWrapper.innerHTML = textContent;
+      
+      chunk.style.clipPath = "inset(0% 0% 0% 0%)";
+      chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
+      
+      chunk.appendChild(innerWrapper);
+      targetsToAnimate.push(innerWrapper);
+    });
+
+    gsap.set(targetsToAnimate, { y: "130%" });
+    gsap.set(chunks, { opacity: 1 });
+  }
+
+  if (navbar) {
+    gsap.set(navbar, { opacity: 0 });
+  }
+  if (navItems.length) {
+    gsap.set(navItems, { opacity: 0, y: 10 });
+  }
+
+  if (imageReveal) {
+    gsap.set(imageReveal, { scaleY: 1, transformOrigin: "bottom" });
+  }
+
+  if (serviceItems.length) {
+    gsap.set(serviceItems, { opacity: 0, y: 20 });
+  }
+
+  if (chunks.length) {
+    tl.to(targetsToAnimate, {
+      y: "0%",
+      duration: 1,
+      stagger: 0.25,
+      ease: "power3.out"
+    });
+  }
+
+  if (navbar) {
+    tl.to(navbar, {
+      opacity: 1,
+      duration: 1,
+      ease: "power3.out"
+    }, 0);
+  }
+
+  if (navItems.length) {
+    tl.to(navItems, {
+      opacity: 1,
+      y: 0,
+      duration: 1,
+      stagger: 0.1,
+      ease: "power3.out"
+    }, 0);
+  }
+
+  if (imageReveal) {
+    tl.to(imageReveal, {
+      scaleY: 0,
+      duration: 1.5,
+      ease: "power2.in"
+    }, 0);
+  }
+
+  if (serviceItems.length) {
+    const position = imageReveal ? "-=0.8" : "-=0.5";
+    tl.to(serviceItems, {
+      opacity: 1,
+      y: 0,
+      duration: 1,
+      stagger: 0.15,
+      ease: "power3.out"
+    }, position);
+  }
 };
 
 // global text line reveal
@@ -57,7 +122,7 @@ window.initLineReveal = () => {
 
     gsap.from(split.lines, {
       yPercent: 130,
-      duration: 1.5,
+      duration: 1,
       ease: "power3.out",
       stagger: 0.1,
       scrollTrigger: {

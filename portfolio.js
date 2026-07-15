@@ -1,6 +1,6 @@
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// hero title loop
+// load and hero text loop
 const initPortfolioLoop = () => {
   const changingSpan = document.querySelector(".portfolio-changing-chunk");
   if (!changingSpan) return;
@@ -40,10 +40,117 @@ const initPortfolioLoop = () => {
       });
   });
 };
+const initPortfolioHeroReveal = () => {
+  const chunks = document.querySelectorAll("[data-hero-reveal='chunk']");
+  const navbar = document.querySelector(".navbar");
+  const navItems = document.querySelectorAll(".nav-container > *");
+  const subtitle = document.querySelector("[data-hero-reveal='subtitle']");
 
-// assign color to portfolio list items
-const initPortfolioBackgrounds = () => {
-  const items = document.querySelectorAll(".portfolio-item");
+  const hasElements = chunks.length || navbar || subtitle;
+  if (!hasElements) return;
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      document.dispatchEvent(new CustomEvent("heroRevealComplete"));
+      initPortfolioLoop();
+    }
+  });
+
+  const targetsToAnimate = [];
+
+  if (chunks.length) {
+    chunks.forEach(chunk => {
+      const textContent = chunk.innerHTML;
+      chunk.innerHTML = "";
+      
+      const innerWrapper = document.createElement("span");
+      innerWrapper.style.display = "block";
+      innerWrapper.innerHTML = textContent;
+      
+      chunk.style.clipPath = "inset(0% 0% 0% 0%)";
+      chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
+      
+      chunk.appendChild(innerWrapper);
+      targetsToAnimate.push(innerWrapper);
+    });
+
+    gsap.set(targetsToAnimate, { y: "130%" });
+    gsap.set(chunks, { opacity: 1 });
+  }
+
+  if (navbar) {
+    gsap.set(navbar, { opacity: 0 });
+  }
+  if (navItems.length) {
+    gsap.set(navItems, { opacity: 0, y: 10 });
+  }
+
+  let split;
+  if (subtitle) {
+    split = new SplitText(subtitle, { type: "lines" });
+    split.lines.forEach(l => {
+      const wrapper = document.createElement("div");
+      wrapper.style.overflow = "hidden";
+      wrapper.style.padding = "0.2em 0.05em";
+      wrapper.style.margin = "-0.2em -0.05em";
+      l.parentNode.insertBefore(wrapper, l);
+      wrapper.appendChild(l);
+    });
+    gsap.set(split.lines, { y: "120%" });
+  }
+
+  if (chunks.length) {
+    tl.to(targetsToAnimate, {
+      y: "0%",
+      duration: 1,
+      stagger: 0.25,
+      ease: "power3.out"
+    });
+  }
+
+  if (navbar) {
+    tl.to(navbar, {
+      opacity: 1,
+      duration: 1,
+      ease: "power3.out"
+    }, 0);
+  }
+
+  if (navItems.length) {
+    tl.to(navItems, {
+      opacity: 1,
+      y: 0,
+      duration: 1,
+      stagger: 0.1,
+      ease: "power3.out"
+    }, 0);
+  }
+
+  if (subtitle && split) {
+    const startOffset = chunks.length ? 0.5 : 0;
+    tl.to(split.lines, {
+      y: "0%",
+      duration: 1.5,
+      stagger: 0.1,
+      ease: "power2.inOut"
+    }, startOffset);
+  }
+};
+
+// project numbers
+const initOrderNumbers = () => {
+  const numbers = document.querySelectorAll("[data-order='number']");
+  numbers.forEach(el => {
+    const text = el.textContent.trim();
+    if (text && !isNaN(text)) {
+      el.textContent = text.padStart(2, "0");
+    }
+  });
+};
+
+// project item hover
+const initPortfolioAnimation = () => {
+  const items = document.querySelectorAll(".project-item");
   const classes = [
     "background-color-lime",
     "background-color-blue",
@@ -52,18 +159,63 @@ const initPortfolioBackgrounds = () => {
     "background-color-red"
   ];
 
+  if (!items.length) return;
+
   items.forEach((item, index) => {
-    const bg = item.querySelector(".portfolio-item-bg");
+    const bg = item.querySelector(".project-item-bg");
     if (bg) {
       bg.classList.add(classes[index % classes.length]);
     }
   });
+
+  let mm = gsap.matchMedia();
+
+  mm.add("(min-width: 991px)", () => {
+    const hoverCleanups = [];
+
+    items.forEach((item) => {
+      const bg = item.querySelector(".project-item-bg");
+      const img = item.querySelector(".project-item-img");
+
+      if (bg) {
+        gsap.set(bg, { height: "0rem" });
+      }
+      if (img) {
+        gsap.set(img, { scale: 1 });
+      }
+
+      const onMouseEnter = () => {
+        if (bg) gsap.to(bg, { height: "1.5rem", duration: 0.3, ease: "power2.out" });
+        if (img) gsap.to(img, { scale: 1.1, duration: 0.3, ease: "power2.out" });
+      };
+
+      const onMouseLeave = () => {
+        if (bg) gsap.to(bg, { height: "0rem", duration: 0.3, ease: "power2.out" });
+        if (img) gsap.to(img, { scale: 1, duration: 0.3, ease: "power2.out" });
+      };
+
+      item.addEventListener("mouseenter", onMouseEnter);
+      item.addEventListener("mouseleave", onMouseLeave);
+      hoverCleanups.push({ item, onMouseEnter, onMouseLeave });
+    });
+
+    return () => {
+      hoverCleanups.forEach(({ item, onMouseEnter, onMouseLeave }) => {
+        item.removeEventListener("mouseenter", onMouseEnter);
+        item.removeEventListener("mouseleave", onMouseLeave);
+        
+        const bg = item.querySelector(".project-item-bg");
+        const img = item.querySelector(".project-item-img");
+        if (bg) gsap.set(bg, { clearProps: "height" });
+        if (img) gsap.set(img, { clearProps: "scale" });
+      });
+    };
+  });
 };
 
+// venues grid slides
 let currentBucket = "";
 let gsapMedia = gsap.matchMedia();
-
-// venues grid slides
 const getLayoutBucket = () => {
   const w = window.innerWidth;
   if (w > 1200) return "desktop";
@@ -71,7 +223,6 @@ const getLayoutBucket = () => {
   if (w >= 481) return "mobile-landscape";
   return "mobile-portrait";
 };
-
 const buildGrid = () => {
   const stage = document.querySelector(".portfolio-venues-wrap");
   const sourceItems = document.querySelectorAll(".cms-venue-item");
@@ -265,7 +416,10 @@ window.addEventListener("resize", () => {
 });
 
 const runPortfolio = () => {
-  initPortfolioBackgrounds();
+  initPortfolioLoop();
+  initPortfolioHeroReveal();
+  initOrderNumbers();
+  initPortfolioAnimation();
   buildGrid();
 };
 

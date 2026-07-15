@@ -1,3 +1,22 @@
+// navbar scroll lock
+const initNavbarScrollLock = () => {
+  const menu = document.querySelector(".mobile-nav");
+  if (!menu) return;
+
+  const observer = new MutationObserver(() => {
+    const isClosed = menu.style.display === "none";
+    document.body.style.overflow = isClosed ? "" : "hidden";
+  });
+
+  observer.observe(menu, { attributes: true, attributeFilter: ["style"] });
+};
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", initNavbarScrollLock);
+} else {
+  initNavbarScrollLock();
+}
+
 // global text line reveal
 window.initLineReveal = () => {
   const targetElements = document.querySelectorAll("[data-text-animation='lines']");

@@ -157,15 +157,12 @@ const HorizontalScroll = () => {
 
   if (!section || !track || !items.length) return;
 
-  let itemBaseLefts = [];
   let trackWidthPx = 0;
 
   const calculateSizes = () => {
-    itemBaseLefts = [];
     let maxRight = 0;
     
     items.forEach(item => {
-      itemBaseLefts.push(item.offsetLeft);
       const rect = item.getBoundingClientRect();
       maxRight = Math.max(maxRight, rect.right + window.scrollX);
     });
@@ -176,13 +173,13 @@ const HorizontalScroll = () => {
 
   calculateSizes();
 
-  gsap.to(track, {
-    x: () => -(trackWidthPx - window.innerWidth),
+  const horizontalTween = gsap.to(track, {
+    x: () => -(trackWidthPx - window.innerWidth * 1.25),
     ease: "none",
     scrollTrigger: {
       trigger: section,
       start: "top top",
-      end: () => `+=${trackWidthPx - window.innerWidth}`,
+      end:() => `+=${(trackWidthPx - window.innerWidth * 1.5) * 0.5}`,
       scrub: true,
       pin: true,
       invalidateOnRefresh: true,
@@ -190,39 +187,64 @@ const HorizontalScroll = () => {
     }
   });
 
-  ScrollTrigger.create({
-    trigger: section,
-    start: "top top",
-    end: () => `+=${trackWidthPx - window.innerWidth}`,
-    scrub: true,
-    invalidateOnRefresh: true,
-    onUpdate: (self) => {
-      const progress = self.progress;
-      const currentX = -progress * (trackWidthPx - window.innerWidth);
-      const viewportCenter = window.innerWidth / 2;
+  items.forEach((item, i) => {
+    const venue = venues[i];
+    const isFirst = i === 0;
+    const isLast = i === items.length - 1;
 
-      items.forEach((item, i) => {
-        const venue = venues[i];
-        if (!venue) return;
+    if (venue) {
+      gsap.set(venue, { opacity: 0 });
 
-        const itemCenterBase = itemBaseLefts[i] + item.offsetWidth / 2;
-        const itemCenterNow = itemCenterBase + currentX;
-        const distance = Math.abs(itemCenterNow - viewportCenter);
-
-        const plateauWidth = item.offsetWidth * 0.6;
-        const fadeWidth = item.offsetWidth * 0.4;
-
-        let opacity;
-        if (distance <= plateauWidth) {
-          opacity = 1;
-        } else if (distance <= plateauWidth + fadeWidth) {
-          opacity = 1 - (distance - plateauWidth) / fadeWidth;
-        } else {
-          opacity = 0;
+      ScrollTrigger.create({
+        trigger: item,
+        containerAnimation: horizontalTween,
+        start: "center 75%",
+        end: "center 25%",
+        onEnter: () => {
+          gsap.to(venue, { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+        },
+        onLeave: () => {
+          gsap.to(venue, { opacity: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
+        },
+        onEnterBack: () => {
+          gsap.to(venue, { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+        },
+        onLeaveBack: () => {
+          gsap.to(venue, { opacity: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
         }
-
-        venue.style.opacity = Math.max(0, opacity);
       });
+    }
+
+    if (isFirst) {
+      gsap.set(item, { opacity: 0, scale: 0.7 });
+
+      ScrollTrigger.create({
+        trigger: item,
+        containerAnimation: horizontalTween,
+        start: "left 65%",
+        onEnter: () => {
+          gsap.to(item, { opacity: 1, scale: 1, duration: 1, ease: "power2.out", overwrite: "auto" });
+        },
+        onLeaveBack: () => {
+          gsap.to(item, { opacity: 0, scale: 0.7, duration: 0.8, ease: "power2.in", overwrite: "auto" });
+        }
+      });
+    } else if (isLast) {
+      gsap.set(item, { opacity: 1, scale: 1 });
+
+      ScrollTrigger.create({
+        trigger: item,
+        containerAnimation: horizontalTween,
+        end: "left 0%",
+        onLeave: () => {
+          gsap.to(item, { opacity: 0, scale: 0.7, duration: 0.5, ease: "power3.in", overwrite: "auto" });
+        },
+        onEnterBack: () => {
+          gsap.to(item, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out", overwrite: "auto" });
+        }
+      });
+    } else {
+      gsap.set(item, { opacity: 1, scale: 1 });
     }
   });
 };
@@ -247,19 +269,23 @@ const HomeSteps = () => {
     }
   });
 
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: wrapper,
-      start: "top bottom",
-      end: "bottom top",
-      scrub: true
-    }
-  });
+  const mm = gsap.matchMedia();
 
-  tl.to(steps[0], { yPercent: -40, ease: "none" }, 0)
-    .to(steps[1], { yPercent: -20, ease: "none" }, 0)
-    .to(steps[3], { yPercent: 20, ease: "none" }, 0)
-    .to(steps[4], { yPercent: 40, ease: "none" }, 0);
+  mm.add("(min-width: 992px)", () => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: wrapper,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: true
+      }
+    });
+
+    tl.to(steps[0], { yPercent: -40, ease: "none" }, 0)
+      .to(steps[1], { yPercent: -20, ease: "none" }, 0)
+      .to(steps[3], { yPercent: 20, ease: "none" }, 0)
+      .to(steps[4], { yPercent: 40, ease: "none" }, 0);
+  });
 };
 
 // cta section reveal

@@ -116,61 +116,59 @@ const initServiceNavReveal = () => {
 
   if (bgs.length !== blocks.length) return;
 
-  gsap.set(bgs, { opacity: 0 });
+  const mm = gsap.matchMedia();
 
-  blocks.forEach((block, index) => {
-    const currentBg = bgs[index];
-    const textElement = block.querySelector("[data-text-animation='lines-services']");
-    const serviceText = block.querySelector(".service-text");
-    
-    const tl = gsap.timeline({ paused: true });
+  mm.add("(min-width: 768px)", () => {
+    gsap.set(bgs, { opacity: 0 });
 
-    tl.to(currentBg, {
-      opacity: 1,
-      duration: 0.5,
-      ease: "power2.out"
-    }, 0);
+    blocks.forEach((block, index) => {
+      const currentBg = bgs[index];
+      const currentNumber = currentBg.parentNode.querySelector(".number");
+      
+      const tl = gsap.timeline({ paused: true });
 
-    const split = new SplitText(textElement, { type: "lines" });
-    split.lines.forEach(line => {
-      const wrapper = document.createElement("div");
-      wrapper.style.overflow = "hidden";
-      wrapper.style.padding = "0.2em 0em";
-      wrapper.style.margin = "-0.2em 0em";
-      line.parentNode.insertBefore(wrapper, line);
-      wrapper.appendChild(line);
-    });
+      tl.to(currentBg, {
+        opacity: 1,
+        duration: 0.5,
+        ease: "power2.out"
+      }, 0);
 
-    gsap.set(serviceText, { opacity: 0 });
-
-    const onceTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: block,
-        start: "top 25%",
-        once: true
+      if (currentBg.classList.contains("background-color-lime") && currentNumber) {
+        tl.to(currentNumber, {
+          color: "black",
+          duration: 0.5,
+          ease: "power2.out"
+        }, 0);
       }
+
+      ScrollTrigger.create({
+        trigger: block,
+        start: "top top",
+        toggleActions: "play none none reverse",
+        animation: tl
+      });
     });
+  });
 
-    onceTl.from(split.lines, {
-      yPercent: 130,
-      duration: 1,
-      ease: "power3.out",
-      stagger: 0.25
-    }, 0.15);
+  mm.add("(min-width: 0px)", () => {
+    blocks.forEach((block, i) => {
+      const textWrap = block.querySelector(".service-text-wrap");
+      const nextBlock = blocks[i + 1];
 
-    const linesDuration = 1 + (split.lines.length - 1) * 0.25;
-    const halfway = 0.15 + (linesDuration / 2);
+      if (nextBlock && textWrap) {
+        gsap.set(textWrap, { opacity: 1 });
 
-    onceTl.to(serviceText, {
-      opacity: 1,
-      duration: 2.5
-    }, halfway);
-
-    ScrollTrigger.create({
-      trigger: block,
-      start: "top 25%",
-      toggleActions: "play none none reverse",
-      animation: tl
+        gsap.to(textWrap, {
+          opacity: 0,
+          ease: "none",
+          scrollTrigger: {
+            trigger: nextBlock,
+            start: "top bottom",
+            end: "top top",
+            scrub: true
+          }
+        });
+      }
     });
   });
 };

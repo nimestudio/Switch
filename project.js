@@ -1,5 +1,6 @@
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
+// load
 const initProjectHeroReveal = () => {
   const imageReveal = document.querySelector("[data-hero-reveal='image-reveal']");
   const textElement = document.querySelector("[data-hero-reveal='text']");
@@ -94,8 +95,75 @@ const initProjectHeroReveal = () => {
   }
 };
 
+// project item hover
+const initPortfolioAnimation = () => {
+  const items = document.querySelectorAll(".project-item");
+  const classes = [
+    "background-color-lime",
+    "background-color-blue",
+    "background-color-purple",
+    "background-color-fucsia",
+    "background-color-red"
+  ];
+
+  if (!items.length) return;
+
+  items.forEach((item, index) => {
+    const bg = item.querySelector(".project-item-bg");
+    if (bg) {
+      bg.classList.add(classes[index % classes.length]);
+    }
+  });
+
+  let mm = gsap.matchMedia();
+
+  mm.add("(min-width: 991px)", () => {
+    const hoverCleanups = [];
+
+    items.forEach((item) => {
+      const bg = item.querySelector(".project-item-bg");
+      const img = item.querySelector(".project-item-img");
+
+      if (bg) {
+        gsap.set(bg, { height: "0rem" });
+      }
+      if (img) {
+        gsap.set(img, { scale: 1 });
+      }
+
+      const onMouseEnter = () => {
+        if (bg) gsap.to(bg, { height: "1.5rem", duration: 0.3, ease: "power2.out" });
+        if (img) gsap.to(img, { scale: 1.1, duration: 0.3, ease: "power2.out" });
+      };
+
+      const onMouseLeave = () => {
+        if (bg) gsap.to(bg, { height: "0rem", duration: 0.3, ease: "power2.out" });
+        if (img) gsap.to(img, { scale: 1, duration: 0.3, ease: "power2.out" });
+      };
+
+      item.addEventListener("mouseenter", onMouseEnter);
+      item.addEventListener("mouseleave", onMouseLeave);
+      hoverCleanups.push({ item, onMouseEnter, onMouseLeave });
+    });
+
+    return () => {
+      hoverCleanups.forEach(({ item, onMouseEnter, onMouseLeave }) => {
+        item.removeEventListener("mouseenter", onMouseEnter);
+        item.removeEventListener("mouseleave", onMouseLeave);
+        
+        const bg = item.querySelector(".project-item-bg");
+        const img = item.querySelector(".project-item-img");
+        if (bg) gsap.set(bg, { clearProps: "height" });
+        if (img) gsap.set(img, { clearProps: "scale" });
+      });
+    };
+  });
+};
+
+
 const runProject = () => {
   initProjectHeroReveal();
+  initPortfolioAnimation();
 };
 
 if (document.readyState === "loading") {

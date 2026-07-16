@@ -179,7 +179,10 @@ const HorizontalScroll = () => {
     scrollTrigger: {
       trigger: section,
       start: "top top",
-      end:() => `+=${(trackWidthPx - window.innerWidth * 1.5) * 0.5}`,
+      end: () => {
+        const isDesktop = window.innerWidth >= 768;
+        return `+=${isDesktop ? (trackWidthPx - window.innerWidth * 1.5) * 0.5 : trackWidthPx - window.innerWidth * 1.25}`;
+      },
       scrub: true,
       pin: true,
       invalidateOnRefresh: true,

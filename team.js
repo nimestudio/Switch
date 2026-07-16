@@ -85,8 +85,41 @@ const initTeamHeroReveal = () => {
   }
 };
 
+// sumamos
+const initSumamosScroll = () => {
+  const section = document.querySelector(".sumamos-section");
+  const items = document.querySelectorAll(".sumamos-text-item");
+
+  if (!section || !items.length) return;
+
+  items.forEach((item) => {
+    gsap.set(item, { opacity: 0.2 });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: item,
+        start: "top 70%",
+        end: "bottom 30%",
+        scrub: true
+      }
+    });
+
+    tl.to(item, {
+      opacity: 1,
+      ease: "power1.inOut",
+      duration: 0.5
+    })
+    .to(item, {
+      opacity: 0.2,
+      ease: "power1.inOut",
+      duration: 0.5
+    });
+  });
+};
+
 const runTeam = () => {
   initTeamHeroReveal();
+  initSumamosScroll();
 };
 
 if (document.readyState === "loading") {

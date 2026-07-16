@@ -239,7 +239,7 @@ const buildGrid = () => {
     rows = 4;
   } else if (bucket === "mobile-landscape" || bucket === "mobile-portrait") {
     cols = 8;
-    rows = 5;
+    rows = 4;
   }
 
   stage.querySelectorAll(".venue-view-grid").forEach(g => g.remove());

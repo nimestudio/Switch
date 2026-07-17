@@ -2,7 +2,7 @@ const initContactHeroReveal = () => {
   const chunks = document.querySelectorAll("[data-hero-reveal='chunk']");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
-  const heroReveal = document.querySelector("[data-hero-reveal='hero']");
+  const heroReveal = document.querySelector("[data-hero-reveal='image-reveal']");
   const contactDetails = document.querySelectorAll("[data-hero-reveal='contact-details']");
 
   const hasElements = chunks.length || navbar || heroReveal || contactDetails.length;

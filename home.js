@@ -334,7 +334,7 @@ const HomeCTAReveal = () => {
   const textWrap = document.querySelector(".cta-reveal-text-wrap");
   const button = document.querySelector(".section-cta .button");
 
-  if (columns.length < 2 || !textWrap) return;
+  if (columns.length < 5 || !textWrap) return;
 
   const split = new SplitText(textWrap, { type: "lines" });
   split.lines.forEach(line => {
@@ -349,47 +349,25 @@ const HomeCTAReveal = () => {
   gsap.set(split.lines, { y: "130%" });
   gsap.set(button, { autoAlpha: 0 });
 
-  let mm = gsap.matchMedia();
+  gsap.set(columns[0], { height: "0%" });
+  gsap.set(columns[1], { height: "25%" });
+  gsap.set(columns[2], { height: "50%" });
+  gsap.set(columns[3], { height: "75%" });
+  gsap.set(columns[4], { height: "100%" });
 
-  mm.add("(min-width: 480px)", () => {
-    if (columns.length >= 5) {
-      gsap.set(columns[0], { height: "0%" });
-      gsap.set(columns[1], { height: "25%" });
-      gsap.set(columns[2], { height: "50%" });
-      gsap.set(columns[3], { height: "75%" });
-      gsap.set(columns[4], { height: "100%" });
-
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top bottom+=40%",
-          end: "top top-=30%",
-          scrub: true
-        }
-      })
-      .to(columns[4], { height: "0%", ease: "none", duration: 100 }, 0)
-      .to(columns[2], { height: "0%", ease: "none", duration: 100 }, 0)
-      .to(columns[0], { height: "0%", ease: "none", duration: 100 }, 0)
-      .to(columns[1], { height: "0%", ease: "none", duration: 100 }, 0)
-      .to(columns[3], { height: "0%", ease: "none", duration: 100 }, 0);
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: section,
+      start: "top bottom+=40%",
+      end: "top top-=30%",
+      scrub: true
     }
-  });
-
-  mm.add("(max-width: 479px)", () => {
-    gsap.set(columns[0], { height: "80%" });
-    gsap.set(columns[1], { height: "100%" });
-
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top bottom+=50%",
-        end: "top top",
-        scrub: true
-      }
-    })
-    .to(columns[0], { height: "0%", ease: "none", duration: 100 }, 0)
-    .to(columns[1], { height: "0%", ease: "none", duration: 100 }, 0);
-  });
+  })
+  .to(columns[4], { height: "0%", ease: "none", duration: 100 }, 0)
+  .to(columns[2], { height: "0%", ease: "none", duration: 100 }, 0)
+  .to(columns[0], { height: "0%", ease: "none", duration: 100 }, 0)
+  .to(columns[1], { height: "0%", ease: "none", duration: 100 }, 0)
+  .to(columns[3], { height: "0%", ease: "none", duration: 100 }, 0);
 
   gsap.timeline({
     scrollTrigger: {

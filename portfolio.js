@@ -2,42 +2,52 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // load and hero text loop
 const initPortfolioLoop = () => {
-  const changingSpan = document.querySelector(".portfolio-changing-chunk");
-  if (!changingSpan) return;
+  const isDesktop = window.innerWidth >= 768;
+  const changingSpans = Array.from(document.querySelectorAll(".portfolio-changing-chunk")).filter(span => {
+    const parentChunk = span.closest("[data-hero-reveal='chunk']");
+    if (!parentChunk) return true;
+    if (isDesktop && parentChunk.classList.contains("hide-on-desktop")) return false;
+    if (!isDesktop && parentChunk.classList.contains("hide-on-mobile")) return false;
+    return true;
+  });
 
-  const wordsAttr = changingSpan.getAttribute("data-words");
-  if (!wordsAttr) return;
+  if (!changingSpans.length) return;
 
-  const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")];
+  changingSpans.forEach(changingSpan => {
+    const wordsAttr = changingSpan.getAttribute("data-words");
+    if (!wordsAttr) return;
 
-  gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
+    const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")];
 
-  const tl = gsap.timeline({ repeat: -1 });
+    gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
 
-  words.forEach((_, index) => {
-    const nextIndex = (index + 1) % words.length;
+    const tl = gsap.timeline({ repeat: -1 });
 
-    tl.to({}, { duration: 2 })
-      .to(changingSpan, {
-        yPercent: -100,
-        duration: 0.3,
-        ease: "power2.in"
-      })
-      .to(changingSpan, {
-        opacity: 0,
-        duration: 0.15,
-        ease: "linear"
-      }, "<")
-      .call(() => {
-        changingSpan.textContent = words[nextIndex];
-      })
-      .set(changingSpan, { yPercent: 100 })
-      .to(changingSpan, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.3,
-        ease: "power2.out"
-      });
+    words.forEach((_, index) => {
+      const nextIndex = (index + 1) % words.length;
+
+      tl.to({}, { duration: 2 })
+        .to(changingSpan, {
+          yPercent: -100,
+          duration: 0.3,
+          ease: "power2.in"
+        })
+        .to(changingSpan, {
+          opacity: 0,
+          duration: 0.15,
+          ease: "linear"
+        }, "<")
+        .call(() => {
+          changingSpan.textContent = words[nextIndex];
+        })
+        .set(changingSpan, { yPercent: 100 })
+        .to(changingSpan, {
+          yPercent: 0,
+          opacity: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+    });
   });
 };
 
@@ -53,19 +63,25 @@ const initPortfolioHeroReveal = () => {
   const tl = gsap.timeline({
     onComplete: () => {
       document.dispatchEvent(new CustomEvent("heroRevealComplete"));
-      initPortfolioLoop();
     }
   });
 
   const targetsToAnimate = [];
   const lineGroups = [];
+  const isDesktop = window.innerWidth >= 768;
 
   if (lines.length) {
     lines.forEach(line => {
       const chunks = line.querySelectorAll("[data-hero-reveal='chunk']");
+      const visibleChunks = Array.from(chunks).filter(chunk => {
+        if (isDesktop && chunk.classList.contains("hide-on-desktop")) return false;
+        if (!isDesktop && chunk.classList.contains("hide-on-mobile")) return false;
+        return true;
+      });
+
       const wrappersInLine = [];
 
-      chunks.forEach(chunk => {
+      visibleChunks.forEach(chunk => {
         const textContent = chunk.innerHTML;
         chunk.innerHTML = "";
         
@@ -112,7 +128,7 @@ const initPortfolioHeroReveal = () => {
   }
 
   if (targetsToAnimate.length) {
-    if (window.innerWidth >= 768) {
+    if (isDesktop) {
       lineGroups.forEach((group, index) => {
         tl.to(group, {
           y: "0%",
@@ -157,6 +173,9 @@ const initPortfolioHeroReveal = () => {
       ease: "power2.inOut"
     }, startOffset);
   }
+
+  const loopStartOffset = isDesktop ? 0.8 : 0.6;
+  tl.call(initPortfolioLoop, null, loopStartOffset);
 };
 
 // project numbers

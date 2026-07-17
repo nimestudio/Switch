@@ -2,7 +2,7 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // load and hero text loop
 const initPortfolioLoop = () => {
-  const isDesktop = window.innerWidth >= 768;
+  const isDesktop = window.innerWidth >= 480;
   const changingSpans = Array.from(document.querySelectorAll(".portfolio-changing-chunk")).filter(span => {
     const parentChunk = span.closest("[data-hero-reveal='chunk']");
     if (!parentChunk) return true;
@@ -14,10 +14,16 @@ const initPortfolioLoop = () => {
   if (!changingSpans.length) return;
 
   changingSpans.forEach(changingSpan => {
+    if (changingSpan.dataset.loopInitialized) return;
+    changingSpan.dataset.loopInitialized = "true";
+
     const wordsAttr = changingSpan.getAttribute("data-words");
     if (!wordsAttr) return;
 
-    const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")];
+    const rawWords = [changingSpan.textContent.trim(), ...wordsAttr.split("-")]
+      .map(w => w.trim())
+      .filter(Boolean);
+    const words = [...new Set(rawWords)];
 
     gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
 
@@ -68,7 +74,7 @@ const initPortfolioHeroReveal = () => {
 
   const targetsToAnimate = [];
   const lineGroups = [];
-  const isDesktop = window.innerWidth >= 768;
+  const isDesktop = window.innerWidth >= 480;
 
   if (lines.length) {
     lines.forEach(line => {

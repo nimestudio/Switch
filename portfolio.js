@@ -5,16 +5,10 @@ const initPortfolioLoop = () => {
   const changingSpan = document.querySelector(".portfolio-changing-chunk");
   if (!changingSpan) return;
 
-  if (changingSpan.dataset.loopInitialized) return;
-  changingSpan.dataset.loopInitialized = "true";
-
   const wordsAttr = changingSpan.getAttribute("data-words");
   if (!wordsAttr) return;
 
-  const rawWords = [changingSpan.textContent.trim(), ...wordsAttr.split("-")]
-    .map(w => w.trim())
-    .filter(Boolean);
-  const words = [...new Set(rawWords)];
+  const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")];
 
   gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
 
@@ -59,12 +53,12 @@ const initPortfolioHeroReveal = () => {
   const tl = gsap.timeline({
     onComplete: () => {
       document.dispatchEvent(new CustomEvent("heroRevealComplete"));
+      initPortfolioLoop();
     }
   });
 
   const targetsToAnimate = [];
   const lineGroups = [];
-  const isDesktop = window.innerWidth >= 480;
 
   if (lines.length) {
     lines.forEach(line => {
@@ -118,7 +112,7 @@ const initPortfolioHeroReveal = () => {
   }
 
   if (targetsToAnimate.length) {
-    if (isDesktop) {
+    if (window.innerWidth >= 768) {
       lineGroups.forEach((group, index) => {
         tl.to(group, {
           y: "0%",
@@ -163,9 +157,6 @@ const initPortfolioHeroReveal = () => {
       ease: "power2.inOut"
     }, startOffset);
   }
-
-  const loopStartOffset = isDesktop ? 0.8 : 0.6;
-  tl.call(initPortfolioLoop, null, loopStartOffset);
 };
 
 // project numbers

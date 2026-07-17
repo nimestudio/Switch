@@ -2,58 +2,48 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // load and hero text loop
 const initPortfolioLoop = () => {
-  const isDesktop = window.innerWidth >= 480;
-  const changingSpans = Array.from(document.querySelectorAll(".portfolio-changing-chunk")).filter(span => {
-    const parentChunk = span.closest("[data-hero-reveal='chunk']");
-    if (!parentChunk) return true;
-    if (isDesktop && parentChunk.classList.contains("hide-on-desktop")) return false;
-    if (!isDesktop && parentChunk.classList.contains("hide-on-mobile")) return false;
-    return true;
-  });
+  const changingSpan = document.querySelector(".portfolio-changing-chunk");
+  if (!changingSpan) return;
 
-  if (!changingSpans.length) return;
+  if (changingSpan.dataset.loopInitialized) return;
+  changingSpan.dataset.loopInitialized = "true";
 
-  changingSpans.forEach(changingSpan => {
-    if (changingSpan.dataset.loopInitialized) return;
-    changingSpan.dataset.loopInitialized = "true";
+  const wordsAttr = changingSpan.getAttribute("data-words");
+  if (!wordsAttr) return;
 
-    const wordsAttr = changingSpan.getAttribute("data-words");
-    if (!wordsAttr) return;
+  const rawWords = [changingSpan.textContent.trim(), ...wordsAttr.split("-")]
+    .map(w => w.trim())
+    .filter(Boolean);
+  const words = [...new Set(rawWords)];
 
-    const rawWords = [changingSpan.textContent.trim(), ...wordsAttr.split("-")]
-      .map(w => w.trim())
-      .filter(Boolean);
-    const words = [...new Set(rawWords)];
+  gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
 
-    gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
+  const tl = gsap.timeline({ repeat: -1 });
 
-    const tl = gsap.timeline({ repeat: -1 });
+  words.forEach((_, index) => {
+    const nextIndex = (index + 1) % words.length;
 
-    words.forEach((_, index) => {
-      const nextIndex = (index + 1) % words.length;
-
-      tl.to({}, { duration: 2 })
-        .to(changingSpan, {
-          yPercent: -100,
-          duration: 0.3,
-          ease: "power2.in"
-        })
-        .to(changingSpan, {
-          opacity: 0,
-          duration: 0.15,
-          ease: "linear"
-        }, "<")
-        .call(() => {
-          changingSpan.textContent = words[nextIndex];
-        })
-        .set(changingSpan, { yPercent: 100 })
-        .to(changingSpan, {
-          yPercent: 0,
-          opacity: 1,
-          duration: 0.3,
-          ease: "power2.out"
-        });
-    });
+    tl.to({}, { duration: 2 })
+      .to(changingSpan, {
+        yPercent: -100,
+        duration: 0.3,
+        ease: "power2.in"
+      })
+      .to(changingSpan, {
+        opacity: 0,
+        duration: 0.15,
+        ease: "linear"
+      }, "<")
+      .call(() => {
+        changingSpan.textContent = words[nextIndex];
+      })
+      .set(changingSpan, { yPercent: 100 })
+      .to(changingSpan, {
+        yPercent: 0,
+        opacity: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
   });
 };
 
@@ -79,15 +69,9 @@ const initPortfolioHeroReveal = () => {
   if (lines.length) {
     lines.forEach(line => {
       const chunks = line.querySelectorAll("[data-hero-reveal='chunk']");
-      const visibleChunks = Array.from(chunks).filter(chunk => {
-        if (isDesktop && chunk.classList.contains("hide-on-desktop")) return false;
-        if (!isDesktop && chunk.classList.contains("hide-on-mobile")) return false;
-        return true;
-      });
-
       const wrappersInLine = [];
 
-      visibleChunks.forEach(chunk => {
+      chunks.forEach(chunk => {
         const textContent = chunk.innerHTML;
         chunk.innerHTML = "";
         

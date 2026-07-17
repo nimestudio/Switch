@@ -40,7 +40,7 @@ window.initLineReveal = () => {
       yPercent: 130,
       duration: 1,
       ease: "power3.out",
-      stagger: 0.1,
+      stagger: 0.2,
       scrollTrigger: {
         trigger: element,
         start: "top 80%",
@@ -80,17 +80,17 @@ const initCTAReveal = () => {
 
   mm.add("(min-width: 480px)", () => {
     if (columns.length >= 5) {
-      gsap.set(columns[0], { height: "85%" });
-      gsap.set(columns[1], { height: "45%" });
-      gsap.set(columns[2], { height: "90%" });
-      gsap.set(columns[3], { height: "55%" });
+      gsap.set(columns[0], { height: "00%" });
+      gsap.set(columns[1], { height: "25%" });
+      gsap.set(columns[2], { height: "50%" });
+      gsap.set(columns[3], { height: "75%" });
       gsap.set(columns[4], { height: "100%" });
 
       gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          start: "top bottom+=50%",
-          end: "top top",
+          start: "top bottom+=40%",
+          end: "top top-=30%",
           scrub: true
         }
       })
@@ -103,8 +103,8 @@ const initCTAReveal = () => {
   });
 
   mm.add("(max-width: 479px)", () => {
-    gsap.set(columns[0], { height: "90%" });
-    gsap.set(columns[1], { height: "60%" });
+    gsap.set(columns[0], { height: "80%" });
+    gsap.set(columns[1], { height: "100%" });
 
     gsap.timeline({
       scrollTrigger: {
@@ -133,8 +133,8 @@ const initCTAReveal = () => {
   })
   .to(button, {
     autoAlpha: 1,
-    duration: 0.8,
-    ease: "power2.out"
+    duration: 1.5,
+    ease: "power1.out"
   }, "-=0.4");
 };
 

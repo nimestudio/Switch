@@ -13,6 +13,8 @@ const PreloaderAndHero = () => {
 
   if (!heroSub || !chunks.length) return;
 
+  const hasVisited = sessionStorage.getItem("hasVisitedHome");
+
   gsap.set(logo, { y: "101%" });
   gsap.set(colorColumns, { height: "0%" });
 
@@ -126,15 +128,21 @@ const PreloaderAndHero = () => {
 
     gsap.set(split.lines, { y: "120%" });
 
-    const tl = gsap.timeline();
-    tl.to(logo, {
-      y: "0%",
-      duration: 1,
-      ease: "power3.inOut",
-      onComplete: () => {
-        startColumnsAnimation();
-      }
-    });
+    if (hasVisited) {
+      gsap.set(".preloader", { display: "none" });
+      runHeroAnimation();
+    } else {
+      sessionStorage.setItem("hasVisitedHome", "true");
+      const tl = gsap.timeline();
+      tl.to(logo, {
+        y: "0%",
+        duration: 1,
+        ease: "power3.inOut",
+        onComplete: () => {
+          startColumnsAnimation();
+        }
+      });
+    }
   });
 };
 
@@ -300,13 +308,7 @@ const HomeCTAReveal = () => {
   const textWrap = document.querySelector(".cta-reveal-text-wrap");
   const button = document.querySelector(".section-cta .button");
 
-  if (columns.length < 5 || !textWrap) return;
-
-  gsap.set(columns[0], { height: "85%" });
-  gsap.set(columns[1], { height: "45%" });
-  gsap.set(columns[2], { height: "90%" });
-  gsap.set(columns[3], { height: "55%" });
-  gsap.set(columns[4], { height: "100%" });
+  if (columns.length < 2 || !textWrap) return;
 
   const split = new SplitText(textWrap, { type: "lines" });
   split.lines.forEach(line => {
@@ -321,19 +323,47 @@ const HomeCTAReveal = () => {
   gsap.set(split.lines, { y: "130%" });
   gsap.set(button, { autoAlpha: 0 });
 
-  gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: "top bottom+=50%",
-      end: "top top",
-      scrub: true
+  let mm = gsap.matchMedia();
+
+  mm.add("(min-width: 480px)", () => {
+    if (columns.length >= 5) {
+      gsap.set(columns[0], { height: "0%" });
+      gsap.set(columns[1], { height: "25%" });
+      gsap.set(columns[2], { height: "50%" });
+      gsap.set(columns[3], { height: "75%" });
+      gsap.set(columns[4], { height: "100%" });
+
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top bottom+=40%",
+          end: "top top-=30%",
+          scrub: true
+        }
+      })
+      .to(columns[4], { height: "0%", ease: "none", duration: 100 }, 0)
+      .to(columns[2], { height: "0%", ease: "none", duration: 100 }, 0)
+      .to(columns[0], { height: "0%", ease: "none", duration: 100 }, 0)
+      .to(columns[1], { height: "0%", ease: "none", duration: 100 }, 0)
+      .to(columns[3], { height: "0%", ease: "none", duration: 100 }, 0);
     }
-  })
-  .to(columns[4], { height: "0%", ease: "none", duration: 100 }, 0)
-  .to(columns[2], { height: "0%", ease: "none", duration: 100 }, 0)
-  .to(columns[0], { height: "0%", ease: "none", duration: 100 }, 0)
-  .to(columns[1], { height: "0%", ease: "none", duration: 100 }, 0)
-  .to(columns[3], { height: "0%", ease: "none", duration: 100 }, 0);
+  });
+
+  mm.add("(max-width: 479px)", () => {
+    gsap.set(columns[0], { height: "80%" });
+    gsap.set(columns[1], { height: "100%" });
+
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top bottom+=50%",
+        end: "top top",
+        scrub: true
+      }
+    })
+    .to(columns[0], { height: "0%", ease: "none", duration: 100 }, 0)
+    .to(columns[1], { height: "0%", ease: "none", duration: 100 }, 0);
+  });
 
   gsap.timeline({
     scrollTrigger: {
@@ -350,8 +380,8 @@ const HomeCTAReveal = () => {
   })
   .to(button, {
     autoAlpha: 1,
-    duration: 0.8,
-    ease: "power2.out"
+    duration: 1.5,
+    ease: "power1.out"
   }, "-=0.4");
 };
 

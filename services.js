@@ -58,7 +58,6 @@ const initServicesHeroReveal = () => {
     tl.to(targetsToAnimate, {
       y: "0%",
       duration: 1,
-      stagger: 0.25,
       ease: "power3.out"
     });
   }

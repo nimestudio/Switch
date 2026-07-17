@@ -3,12 +3,19 @@ const initNavbarScrollLock = () => {
   const menu = document.querySelector(".mobile-nav");
   if (!menu) return;
 
-  const observer = new MutationObserver(() => {
-    const isClosed = menu.style.display === "none";
-    document.body.style.overflow = isClosed ? "" : "hidden";
-  });
+  const checkScrollLock = () => {
+    const isClosed = window.getComputedStyle(menu).display === "none";
+    if (window.innerWidth >= 992 || isClosed) {
+      document.body.style.overflow = "";
+    } else {
+      document.body.style.overflow = "hidden";
+    }
+  };
 
-  observer.observe(menu, { attributes: true, attributeFilter: ["style"] });
+  const observer = new MutationObserver(checkScrollLock);
+  observer.observe(menu, { attributes: true, attributeFilter: ["style", "class"] });
+
+  window.addEventListener("resize", checkScrollLock);
 };
 
 if (document.readyState === "loading") {

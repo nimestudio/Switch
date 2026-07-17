@@ -2,7 +2,7 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // load
 const initTeamHeroReveal = () => {
-  const lines = document.querySelectorAll(".team-heading-line");
+  const lines = document.querySelectorAll(".hero-heading-line");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
   const imageReveal = document.querySelector("[data-hero-reveal='image-reveal']");
@@ -16,6 +16,7 @@ const initTeamHeroReveal = () => {
     }
   });
 
+  const targetsToAnimate = [];
   const lineGroups = [];
 
   if (lines.length) {
@@ -36,6 +37,7 @@ const initTeamHeroReveal = () => {
         
         chunk.appendChild(innerWrapper);
         wrappersInLine.push(innerWrapper);
+        targetsToAnimate.push(innerWrapper);
 
         gsap.set(innerWrapper, { y: "130%" });
         gsap.set(chunk, { opacity: 1 });
@@ -58,14 +60,23 @@ const initTeamHeroReveal = () => {
     gsap.set(imageReveal, { scaleY: 1, transformOrigin: "bottom" });
   }
 
-  if (lineGroups.length) {
-    lineGroups.forEach((group, index) => {
-      tl.to(group, {
+  if (targetsToAnimate.length) {
+    if (window.innerWidth >= 768) {
+      lineGroups.forEach((group, index) => {
+        tl.to(group, {
+          y: "0%",
+          duration: 1,
+          ease: "power3.out"
+        }, index * 0.25);
+      });
+    } else {
+      tl.to(targetsToAnimate, {
         y: "0%",
         duration: 1,
+        stagger: 0.25,
         ease: "power3.out"
-      }, index * 0.25);
-    });
+      }, 0);
+    }
   }
 
   if (navbar) {

@@ -9,9 +9,9 @@ const PreloaderAndHero = () => {
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
   const heroSub = document.querySelector(".home-hero-sub p");
-  const chunks = document.querySelectorAll(".heading-chunk");
+  const lines = document.querySelectorAll(".hero-heading-line");
 
-  if (!heroSub || !chunks.length) return;
+  if (!heroSub || !lines.length) return;
 
   const hasVisited = sessionStorage.getItem("hasVisitedHome");
 
@@ -27,34 +27,57 @@ const PreloaderAndHero = () => {
 
   let split;
   const targetsToAnimate = [];
+  const lineGroups = [];
 
-  chunks.forEach(chunk => {
-    const textContent = chunk.innerHTML;
-    chunk.innerHTML = "";
-    
-    const innerWrapper = document.createElement("span");
-    innerWrapper.style.display = "block";
-    innerWrapper.innerHTML = textContent;
-    
-    chunk.style.clipPath = "inset(0% 0% 0% 0%)";
-    chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
-    
-    chunk.appendChild(innerWrapper);
-    targetsToAnimate.push(innerWrapper);
+  lines.forEach(line => {
+    const chunks = line.querySelectorAll("[data-hero-reveal='chunk']");
+    const wrappersInLine = [];
+
+    chunks.forEach(chunk => {
+      const textContent = chunk.innerHTML;
+      chunk.innerHTML = "";
+      
+      const innerWrapper = document.createElement("span");
+      innerWrapper.style.display = "block";
+      innerWrapper.innerHTML = textContent;
+      
+      chunk.style.clipPath = "inset(0% 0% 0% 0%)";
+      chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
+      
+      chunk.appendChild(innerWrapper);
+      wrappersInLine.push(innerWrapper);
+      targetsToAnimate.push(innerWrapper);
+
+      gsap.set(innerWrapper, { y: "130%" });
+      gsap.set(chunk, { opacity: 1 });
+    });
+
+    if (wrappersInLine.length) {
+      lineGroups.push(wrappersInLine);
+    }
   });
-
-  gsap.set(targetsToAnimate, { y: "130%" });
-  gsap.set(chunks, { opacity: 1 });
 
   const runHeroAnimation = () => {
     const heroTl = gsap.timeline();
 
-    heroTl.to(targetsToAnimate, {
-      y: "0%",
-      duration: 1,
-      stagger: 0.4,
-      ease: "power3.out"
-    });
+    if (targetsToAnimate.length) {
+      if (window.innerWidth >= 768) {
+        lineGroups.forEach((group, index) => {
+          heroTl.to(group, {
+            y: "0%",
+            duration: 1,
+            ease: "power3.out"
+          }, index * 0.25);
+        });
+      } else {
+        heroTl.to(targetsToAnimate, {
+          y: "0%",
+          duration: 1,
+          stagger: 0.25,
+          ease: "power3.out"
+        }, 0);
+      }
+    }
 
     if (navbar) {
       heroTl.to(navbar, {
@@ -74,12 +97,15 @@ const PreloaderAndHero = () => {
       }, 0);
     }
 
-    heroTl.to(split.lines, {
-      y: "0%",
-      duration: 1.5,
-      stagger: 0.1,
-      ease: "power2.inOut"
-    }, 0.5);
+    if (split && split.lines) {
+      const startOffset = targetsToAnimate.length ? 0.5 : 0;
+      heroTl.to(split.lines, {
+        y: "0%",
+        duration: 1.5,
+        stagger: 0.1,
+        ease: "power2.inOut"
+      }, startOffset);
+    }
   };
 
   const startColumnsAnimation = () => {

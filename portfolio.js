@@ -40,13 +40,14 @@ const initPortfolioLoop = () => {
       });
   });
 };
+
 const initPortfolioHeroReveal = () => {
-  const chunks = document.querySelectorAll("[data-hero-reveal='chunk']");
+  const lines = document.querySelectorAll(".hero-heading-line");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
   const subtitle = document.querySelector("[data-hero-reveal='subtitle']");
 
-  const hasElements = chunks.length || navbar || subtitle;
+  const hasElements = lines.length || navbar || subtitle;
   if (!hasElements) return;
 
   const tl = gsap.timeline({
@@ -57,25 +58,36 @@ const initPortfolioHeroReveal = () => {
   });
 
   const targetsToAnimate = [];
+  const lineGroups = [];
 
-  if (chunks.length) {
-    chunks.forEach(chunk => {
-      const textContent = chunk.innerHTML;
-      chunk.innerHTML = "";
-      
-      const innerWrapper = document.createElement("span");
-      innerWrapper.style.display = "block";
-      innerWrapper.innerHTML = textContent;
-      
-      chunk.style.clipPath = "inset(0% 0% 0% 0%)";
-      chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
-      
-      chunk.appendChild(innerWrapper);
-      targetsToAnimate.push(innerWrapper);
+  if (lines.length) {
+    lines.forEach(line => {
+      const chunks = line.querySelectorAll("[data-hero-reveal='chunk']");
+      const wrappersInLine = [];
+
+      chunks.forEach(chunk => {
+        const textContent = chunk.innerHTML;
+        chunk.innerHTML = "";
+        
+        const innerWrapper = document.createElement("span");
+        innerWrapper.style.display = "block";
+        innerWrapper.innerHTML = textContent;
+        
+        chunk.style.clipPath = "inset(0% 0% 0% 0%)";
+        chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
+        
+        chunk.appendChild(innerWrapper);
+        wrappersInLine.push(innerWrapper);
+        targetsToAnimate.push(innerWrapper);
+
+        gsap.set(innerWrapper, { y: "130%" });
+        gsap.set(chunk, { opacity: 1 });
+      });
+
+      if (wrappersInLine.length) {
+        lineGroups.push(wrappersInLine);
+      }
     });
-
-    gsap.set(targetsToAnimate, { y: "130%" });
-    gsap.set(chunks, { opacity: 1 });
   }
 
   if (navbar) {
@@ -99,13 +111,23 @@ const initPortfolioHeroReveal = () => {
     gsap.set(split.lines, { y: "120%" });
   }
 
-  if (chunks.length) {
-    tl.to(targetsToAnimate, {
-      y: "0%",
-      duration: 1,
-      stagger: 0.25,
-      ease: "power3.out"
-    });
+  if (targetsToAnimate.length) {
+    if (window.innerWidth >= 768) {
+      lineGroups.forEach((group, index) => {
+        tl.to(group, {
+          y: "0%",
+          duration: 1,
+          ease: "power3.out"
+        }, index * 0.25);
+      });
+    } else {
+      tl.to(targetsToAnimate, {
+        y: "0%",
+        duration: 1,
+        stagger: 0.25,
+        ease: "power3.out"
+      }, 0);
+    }
   }
 
   if (navbar) {
@@ -127,7 +149,7 @@ const initPortfolioHeroReveal = () => {
   }
 
   if (subtitle && split) {
-    const startOffset = chunks.length ? 0.5 : 0;
+    const startOffset = targetsToAnimate.length ? 0.5 : 0;
     tl.to(split.lines, {
       y: "0%",
       duration: 1.5,

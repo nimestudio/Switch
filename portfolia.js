@@ -53,7 +53,6 @@ const initPortfolioHeroReveal = () => {
   const tl = gsap.timeline({
     onComplete: () => {
       document.dispatchEvent(new CustomEvent("heroRevealComplete"));
-      initPortfolioLoop();
     }
   });
 
@@ -157,6 +156,9 @@ const initPortfolioHeroReveal = () => {
       ease: "power2.inOut"
     }, startOffset);
   }
+
+  tl.call(initPortfolioLoop, null, "-=0.6");
+  
 };
 
 // project numbers
@@ -438,7 +440,6 @@ window.addEventListener("resize", () => {
 });
 
 const runPortfolio = () => {
-  initPortfolioLoop();
   initPortfolioHeroReveal();
   initOrderNumbers();
   initPortfolioAnimation();

@@ -187,7 +187,7 @@ const HorizontalScroll = () => {
   const section = document.querySelector(".section-home-intro");
   const track = document.querySelector(".scroll-track");
   const items = document.querySelectorAll(".scroll-item");
-  const venues = document.querySelectorAll(".home-intro-venue");
+  const venues = document.querySelectorAll(".home-intro-venue-wrap");
 
   if (!section || !track || !items.length) return;
 

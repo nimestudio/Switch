@@ -1,14 +1,16 @@
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// load and hero text loop
+// hero text loop
 const initPortfolioLoop = () => {
   const changingSpan = document.querySelector(".portfolio-changing-chunk");
-  if (!changingSpan) return;
+  if (!changingSpan || changingSpan.dataset.loopInitialized) return;
+  
+  changingSpan.dataset.loopInitialized = "true";
 
   const wordsAttr = changingSpan.getAttribute("data-words");
   if (!wordsAttr) return;
 
-  const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")];
+  const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")].filter(Boolean);
 
   gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
 
@@ -30,7 +32,7 @@ const initPortfolioLoop = () => {
       }, "<")
       .call(() => {
         changingSpan.textContent = words[nextIndex];
-      })
+      }, null, "+=0.15")
       .set(changingSpan, { yPercent: 100 })
       .to(changingSpan, {
         yPercent: 0,
@@ -41,6 +43,7 @@ const initPortfolioLoop = () => {
   });
 };
 
+// page load
 const initPortfolioHeroReveal = () => {
   const lines = document.querySelectorAll(".hero-heading-line");
   const navbar = document.querySelector(".navbar");

@@ -182,7 +182,7 @@ gsap.ticker.add((time) => {
 
 gsap.ticker.lagSmoothing(0);
 
-// intro horizontal scroll
+// venues scroll
 const HorizontalScroll = () => {
   const section = document.querySelector(".section-home-intro");
   const track = document.querySelector(".scroll-track");
@@ -285,6 +285,44 @@ const HorizontalScroll = () => {
       }
     });
   });
+};
+
+// venues slider
+const initMobileSlider = () => {
+  if (window.innerWidth > 991) return;
+  
+  const sliderElement = document.querySelector("#mobile-intro-slider");
+  if (!sliderElement) return;
+
+  const splide = new Splide("#mobile-intro-slider", {
+    type: "loop",
+    perPage: 1,
+    arrows: false,
+    pagination: true,
+    gap: "1.5rem",
+    flickPower: 500,
+    turnPage: 1,
+    updateOnMove: true,
+    autoplay: true,
+    interval: 3000
+  });
+
+  splide.mount();
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const autoplay = splide.Components.Autoplay;
+      if (!autoplay) return;
+      
+      if (entry.isIntersecting) {
+        autoplay.play();
+      } else {
+        autoplay.pause();
+      }
+    });
+  }, { threshold: 0.2 });
+
+  observer.observe(sliderElement);
 };
 
 // steps
@@ -393,6 +431,7 @@ const HomeCTAReveal = () => {
 const runHomeScripts = () => {
   PreloaderAndHero();
   HorizontalScroll();
+  initMobileSlider();
   HomeSteps();
   HomeCTAReveal();
   

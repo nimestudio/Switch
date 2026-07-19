@@ -161,7 +161,7 @@ const initPortfolioHeroReveal = () => {
     }, startOffset);
   }
 
-  tl.call(initPortfolioLoop, null, "-=0.6");
+  tl.call(initPortfolioLoop, null, "-=1");
   
 };
 

@@ -154,6 +154,7 @@ const initPortfolioHeroReveal = () => {
     const startOffset = targetsToAnimate.length ? 0.5 : 0;
     tl.to(split.lines, {
       y: "0%",
+      opacity: 1,
       duration: 1.5,
       stagger: 0.1,
       ease: "power2.inOut"

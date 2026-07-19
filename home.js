@@ -296,6 +296,7 @@ const initMobileSlider = () => {
 
   const splide = new Splide("#mobile-intro-slider", {
     type: "fade",
+    speed: 800,
     rewind: true,
     arrows: false,
     pagination: true,

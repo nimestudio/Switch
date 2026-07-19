@@ -184,8 +184,8 @@ const initServiceNavReveal = () => {
           ease: "none",
           scrollTrigger: {
             trigger: nextBlock,
-            start: "top bottom",
-            end: "top top",
+            start: "top 60%",
+            end: "top 30%",
             scrub: true
           }
         });

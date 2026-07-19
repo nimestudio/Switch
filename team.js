@@ -73,7 +73,7 @@ const initTeamHeroReveal = () => {
       tl.to(targetsToAnimate, {
         y: "0%",
         duration: 1,
-        stagger: 0.25,
+        stagger: 0.3,
         ease: "power3.out"
       }, 0);
     }
@@ -119,8 +119,8 @@ const initSumamosScroll = () => {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: item,
-        start: "top 70%",
-        end: "bottom 30%",
+        start: "top 60%",
+        end: "bottom 40%",
         scrub: true
       }
     });
@@ -128,12 +128,12 @@ const initSumamosScroll = () => {
     tl.to(item, {
       opacity: 1,
       ease: "power1.inOut",
-      duration: 0.5
+      duration: 0.25
     })
     .to(item, {
       opacity: 0.2,
       ease: "power1.inOut",
-      duration: 0.5
+      duration: 0.25
     });
   });
 };

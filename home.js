@@ -191,98 +191,99 @@ const HorizontalScroll = () => {
 
   if (!section || !track || !items.length) return;
 
-  let trackWidthPx = 0;
+  const mm = gsap.matchMedia();
 
-  const calculateSizes = () => {
-    let maxRight = 0;
-    
-    items.forEach(item => {
-      const rect = item.getBoundingClientRect();
-      maxRight = Math.max(maxRight, rect.right + window.scrollX);
+  mm.add("(min-width: 992px)", () => {
+    let trackWidthPx = 0;
+
+    const calculateSizes = () => {
+      let maxRight = 0;
+      
+      items.forEach(item => {
+        const rect = item.getBoundingClientRect();
+        maxRight = Math.max(maxRight, rect.right + window.scrollX);
+      });
+
+      const extraSpace = window.innerWidth;
+      trackWidthPx = maxRight + extraSpace;
+    };
+
+    calculateSizes();
+
+    const horizontalTween = gsap.to(track, {
+      x: () => -(trackWidthPx - window.innerWidth * 1.25),
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: () => `+=${(trackWidthPx - window.innerWidth * 1.5) * 0.5}`,
+        scrub: true,
+        pin: true,
+        invalidateOnRefresh: true,
+        onRefresh: calculateSizes
+      }
     });
 
-    const extraSpace = window.innerWidth;
-    trackWidthPx = maxRight + extraSpace;
-  };
+    items.forEach((item, i) => {
+      const venue = venues[i];
+      const isFirst = i === 0;
+      const isLast = i === items.length - 1;
 
-  calculateSizes();
+      if (venue) {
+        gsap.set(venue, { opacity: 0 });
 
-  const horizontalTween = gsap.to(track, {
-    x: () => -(trackWidthPx - window.innerWidth * 1.25),
-    ease: "none",
-    scrollTrigger: {
-      trigger: section,
-      start: "top top",
-      end: () => {
-        const isDesktop = window.innerWidth >= 768;
-        return `+=${isDesktop ? (trackWidthPx - window.innerWidth * 1.5) * 0.5 : trackWidthPx - window.innerWidth * 1.25}`;
-      },
-      scrub: true,
-      pin: true,
-      invalidateOnRefresh: true,
-      onRefresh: calculateSizes
-    }
-  });
+        ScrollTrigger.create({
+          trigger: item,
+          containerAnimation: horizontalTween,
+          start: "center 75%",
+          end: "center 25%",
+          onEnter: () => {
+            gsap.to(venue, { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+          },
+          onLeave: () => {
+            gsap.to(venue, { opacity: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
+          },
+          onEnterBack: () => {
+            gsap.to(venue, { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+          },
+          onLeaveBack: () => {
+            gsap.to(venue, { opacity: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
+          }
+        });
+      }
 
-  items.forEach((item, i) => {
-    const venue = venues[i];
-    const isFirst = i === 0;
-    const isLast = i === items.length - 1;
+      if (isFirst) {
+        gsap.set(item, { opacity: 0, scale: 0.7 });
 
-    if (venue) {
-      gsap.set(venue, { opacity: 0 });
+        ScrollTrigger.create({
+          trigger: item,
+          containerAnimation: horizontalTween,
+          start: "left 65%",
+          onEnter: () => {
+            gsap.to(item, { opacity: 1, scale: 1, duration: 1, ease: "power2.out", overwrite: "auto" });
+          },
+          onLeaveBack: () => {
+            gsap.to(item, { opacity: 0, scale: 0.7, duration: 0.8, ease: "power2.in", overwrite: "auto" });
+          }
+        });
+      } else if (isLast) {
+        gsap.set(item, { opacity: 1, scale: 1 });
 
-      ScrollTrigger.create({
-        trigger: item,
-        containerAnimation: horizontalTween,
-        start: "center 75%",
-        end: "center 25%",
-        onEnter: () => {
-          gsap.to(venue, { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
-        },
-        onLeave: () => {
-          gsap.to(venue, { opacity: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
-        },
-        onEnterBack: () => {
-          gsap.to(venue, { opacity: 1, duration: 0.4, ease: "power2.out", overwrite: "auto" });
-        },
-        onLeaveBack: () => {
-          gsap.to(venue, { opacity: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
-        }
-      });
-    }
-
-    if (isFirst) {
-      gsap.set(item, { opacity: 0, scale: 0.7 });
-
-      ScrollTrigger.create({
-        trigger: item,
-        containerAnimation: horizontalTween,
-        start: "left 65%",
-        onEnter: () => {
-          gsap.to(item, { opacity: 1, scale: 1, duration: 1, ease: "power2.out", overwrite: "auto" });
-        },
-        onLeaveBack: () => {
-          gsap.to(item, { opacity: 0, scale: 0.7, duration: 0.8, ease: "power2.in", overwrite: "auto" });
-        }
-      });
-    } else if (isLast) {
-      gsap.set(item, { opacity: 1, scale: 1 });
-
-      ScrollTrigger.create({
-        trigger: item,
-        containerAnimation: horizontalTween,
-        end: "left 0%",
-        onLeave: () => {
-          gsap.to(item, { opacity: 0, scale: 0.7, duration: 0.5, ease: "power3.in", overwrite: "auto" });
-        },
-        onEnterBack: () => {
-          gsap.to(item, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out", overwrite: "auto" });
-        }
-      });
-    } else {
-      gsap.set(item, { opacity: 1, scale: 1 });
-    }
+        ScrollTrigger.create({
+          trigger: item,
+          containerAnimation: horizontalTween,
+          end: "left 0%",
+          onLeave: () => {
+            gsap.to(item, { opacity: 0, scale: 0.7, duration: 0.5, ease: "power3.in", overwrite: "auto" });
+          },
+          onEnterBack: () => {
+            gsap.to(item, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out", overwrite: "auto" });
+          }
+        });
+      } else {
+        gsap.set(item, { opacity: 1, scale: 1 });
+      }
+    });
   });
 };
 

@@ -295,16 +295,13 @@ const initMobileSlider = () => {
   if (!sliderElement) return;
 
   const splide = new Splide("#mobile-intro-slider", {
-    type: "loop",
-    perPage: 1,
+    type: "fade",
+    rewind: true,
     arrows: false,
     pagination: true,
-    gap: "1.5rem",
-    flickPower: 500,
-    turnPage: 1,
-    updateOnMove: true,
     autoplay: true,
-    interval: 3000
+    interval: 3000,
+    speed: 800
   });
 
   splide.mount();

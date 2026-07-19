@@ -300,8 +300,7 @@ const initMobileSlider = () => {
     arrows: false,
     pagination: true,
     autoplay: true,
-    interval: 3000,
-    speed: 800
+    interval: 3000
   });
 
   splide.mount();

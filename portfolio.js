@@ -450,10 +450,18 @@ const runPortfolio = () => {
   buildGrid();
 };
 
-document.addEventListener("heroRevealComplete", initPortfolioLoop);
+const checkGsapAndRun = () => {
+  if (typeof window.gsap === "undefined" || typeof window.SplitText === "undefined") {
+    setTimeout(checkGsapAndRun, 50);
+    return;
+  }
+  
+  if (document.readyState === "complete") {
+    runPortfolio();
+  } else {
+    window.addEventListener("load", runPortfolio);
+  }
+};
 
-if (document.readyState === "loading") {
-  window.addEventListener("DOMContentLoaded", runPortfolio);
-} else {
-  runPortfolio();
-}
+window.Webflow = window.Webflow || [];
+window.Webflow.push(checkGsapAndRun);

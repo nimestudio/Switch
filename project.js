@@ -166,8 +166,18 @@ const runProject = () => {
   initPortfolioAnimation();
 };
 
-if (document.readyState === "loading") {
-  window.addEventListener("DOMContentLoaded", runProject);
-} else {
-  runProject();
-}
+const checkGsapAndRunProject = () => {
+  if (typeof window.gsap === "undefined" || typeof window.SplitText === "undefined") {
+    setTimeout(checkGsapAndRunProject, 50);
+    return;
+  }
+  
+  if (document.readyState === "complete") {
+    runProject();
+  } else {
+    window.addEventListener("load", runProject);
+  }
+};
+
+window.Webflow = window.Webflow || [];
+window.Webflow.push(checkGsapAndRunProject);

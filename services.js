@@ -234,8 +234,18 @@ const runService = () => {
   initServicesScroll();
 };
 
-if (document.readyState === "loading") {
-  window.addEventListener("DOMContentLoaded", runService);
-} else {
-  runService();
-}
+const checkGsapAndRunService = () => {
+  if (typeof window.gsap === "undefined" || typeof window.SplitText === "undefined") {
+    setTimeout(checkGsapAndRunService, 50);
+    return;
+  }
+  
+  if (document.readyState === "complete") {
+    runService();
+  } else {
+    window.addEventListener("load", runService);
+  }
+};
+
+window.Webflow = window.Webflow || [];
+window.Webflow.push(checkGsapAndRunService);

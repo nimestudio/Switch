@@ -143,12 +143,22 @@ const runTeam = () => {
   initSumamosScroll();
 };
 
-if (document.readyState === "loading") {
-  window.addEventListener("DOMContentLoaded", runTeam);
-} else {
-  runTeam();
-}
+const checkGsapAndRunTeam = () => {
+  if (typeof window.gsap === "undefined" || typeof window.SplitText === "undefined" || typeof window.ScrollTrigger === "undefined") {
+    setTimeout(checkGsapAndRunTeam, 50);
+    return;
+  }
+  
+  if (document.readyState === "complete") {
+    runTeam();
+    ScrollTrigger.refresh();
+  } else {
+    window.addEventListener("load", () => {
+      runTeam();
+      ScrollTrigger.refresh();
+    });
+  }
+};
 
-window.addEventListener("load", () => {
-  ScrollTrigger.refresh();
-});
+window.Webflow = window.Webflow || [];
+window.Webflow.push(checkGsapAndRunTeam);

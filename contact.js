@@ -119,6 +119,22 @@ const initContactHeroReveal = () => {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+const runContact = () => {
   initContactHeroReveal();
-});
+};
+
+const checkGsapAndRunContact = () => {
+  if (typeof window.gsap === "undefined" || typeof window.SplitText === "undefined") {
+    setTimeout(checkGsapAndRunContact, 50);
+    return;
+  }
+  
+  if (document.readyState === "complete") {
+    runContact();
+  } else {
+    window.addEventListener("load", runContact);
+  }
+};
+
+window.Webflow = window.Webflow || [];
+window.Webflow.push(checkGsapAndRunContact);

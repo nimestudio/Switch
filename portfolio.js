@@ -244,6 +244,7 @@ const initPortfolioAnimation = () => {
 // venues grid slides
 let currentBucket = "";
 let gsapMedia = gsap.matchMedia();
+
 const getLayoutBucket = () => {
   const w = window.innerWidth;
   if (w > 1200) return "desktop";
@@ -251,6 +252,7 @@ const getLayoutBucket = () => {
   if (w >= 481) return "mobile-landscape";
   return "mobile-portrait";
 };
+
 const buildGrid = () => {
   const stage = document.querySelector(".portfolio-venues-wrap");
   const sourceItems = document.querySelectorAll(".cms-venue-item");
@@ -258,6 +260,7 @@ const buildGrid = () => {
 
   const bucket = getLayoutBucket();
   currentBucket = bucket;
+  const isMobile = bucket.includes("mobile");
 
   let cols = 10;
   let rows = 3;
@@ -265,8 +268,8 @@ const buildGrid = () => {
   if (bucket === "tablet") {
     cols = 8;
     rows = 4;
-  } else if (bucket === "mobile-landscape" || bucket === "mobile-portrait") {
-    cols = 8;
+  } else if (isMobile) {
+    cols = 6;
     rows = 4;
   }
 
@@ -295,6 +298,24 @@ const buildGrid = () => {
     const grid = views[viewId];
     const cards = Array.from(grid.querySelectorAll(".venue-item-card"));
     
+    const coordinates = [];
+    for (let r = 1; r <= rows; r++) {
+      for (let c = 1; c <= cols; c++) {
+        coordinates.push({ row: r, col: c });
+      }
+    }
+
+    if (isMobile) {
+      cards.forEach((card) => {
+        if (coordinates.length === 0) return;
+        const randomIndex = Math.floor(Math.random() * coordinates.length);
+        const coords = coordinates.splice(randomIndex, 1)[0];
+        card.style.gridRowStart = coords.row;
+        card.style.gridColumnStart = coords.col;
+      });
+      return;
+    }
+
     const highlightedCards = cards.filter(card => {
       const attr = card.getAttribute("data-highlight");
       return attr && attr.trim() !== "";
@@ -304,13 +325,6 @@ const buildGrid = () => {
       return !attr || attr.trim() === "";
     });
 
-    const coordinates = [];
-    for (let r = 1; r <= rows; r++) {
-      for (let c = 1; c <= cols; c++) {
-        coordinates.push({ row: r, col: c });
-      }
-    }
-
     const placedAll = [];
     const placedHighlights = [];
 
@@ -318,43 +332,34 @@ const buildGrid = () => {
 
     const checkContiguity = (coord) => {
       const { row: r, col: c } = coord;
-      
       if (isOccupied(r, c - 1) && isOccupied(r, c - 2)) return false;
       if (isOccupied(r, c + 1) && isOccupied(r, c + 2)) return false;
       if (isOccupied(r, c - 1) && isOccupied(r, c + 1)) return false;
       if (isOccupied(r - 1, c) && isOccupied(r - 2, c)) return false;
       if (isOccupied(r + 1, c) && isOccupied(r + 2, c)) return false;
       if (isOccupied(r - 1, c) && isOccupied(r + 1, c)) return false;
-      
       if (isOccupied(r, c + 1) && isOccupied(r + 1, c) && isOccupied(r + 1, c + 1)) return false;
       if (isOccupied(r, c - 1) && isOccupied(r + 1, c - 1) && isOccupied(r + 1, c)) return false;
       if (isOccupied(r - 1, c) && isOccupied(r, c + 1) && isOccupied(r - 1, c + 1)) return false;
       if (isOccupied(r - 1, c - 1) && isOccupied(r - 1, c) && isOccupied(r, c - 1)) return false;
-      
       return true;
     };
 
     highlightedCards.forEach((card) => {
       if (coordinates.length === 0) return;
-
       const validCoordinates = coordinates.filter(coord => {
         if (coord.col === 1 || coord.col === cols) return false;
-        
         const noAdjacentHighlight = !placedHighlights.some(ph => {
           return (Math.abs(coord.row - ph.row) + Math.abs(coord.col - ph.col)) === 1;
         });
         return noAdjacentHighlight && checkContiguity(coord);
       });
-
       const targetPool = validCoordinates.length > 0 ? validCoordinates : coordinates.filter(c => c.col !== 1 && c.col !== cols);
       if (targetPool.length === 0) return;
-      
       const randomIndex = Math.floor(Math.random() * targetPool.length);
       const chosenCoord = targetPool[randomIndex];
-
       const coordIndex = coordinates.findIndex(c => c.row === chosenCoord.row && c.col === chosenCoord.col);
       const coords = coordinates.splice(coordIndex, 1)[0];
-
       placedHighlights.push(coords);
       placedAll.push(coords);
       card.style.gridRowStart = coords.row;
@@ -364,14 +369,12 @@ const buildGrid = () => {
     if (normalCards.length > 0) {
       let col1Pool = coordinates.filter(c => c.col === 1 && checkContiguity(c));
       if (col1Pool.length === 0) col1Pool = coordinates.filter(c => c.col === 1);
-      
       if (col1Pool.length > 0) {
         const card = normalCards.shift();
         const randomIndex = Math.floor(Math.random() * col1Pool.length);
         const chosenCoord = col1Pool[randomIndex];
         const coordIndex = coordinates.findIndex(c => c.row === chosenCoord.row && c.col === chosenCoord.col);
         const coords = coordinates.splice(coordIndex, 1)[0];
-        
         placedAll.push(coords);
         card.style.gridRowStart = coords.row;
         card.style.gridColumnStart = coords.col;
@@ -381,14 +384,12 @@ const buildGrid = () => {
     if (normalCards.length > 0) {
       let colMaxPool = coordinates.filter(c => c.col === cols && checkContiguity(c));
       if (colMaxPool.length === 0) colMaxPool = coordinates.filter(c => c.col === cols);
-      
       if (colMaxPool.length > 0) {
         const card = normalCards.shift();
         const randomIndex = Math.floor(Math.random() * colMaxPool.length);
         const chosenCoord = colMaxPool[randomIndex];
         const coordIndex = coordinates.findIndex(c => c.row === chosenCoord.row && c.col === chosenCoord.col);
         const coords = coordinates.splice(coordIndex, 1)[0];
-        
         placedAll.push(coords);
         card.style.gridRowStart = coords.row;
         card.style.gridColumnStart = coords.col;
@@ -397,16 +398,12 @@ const buildGrid = () => {
 
     normalCards.forEach((card) => {
       if (coordinates.length === 0) return;
-
       const validCoordinates = coordinates.filter(coord => checkContiguity(coord));
-
       const targetPool = validCoordinates.length > 0 ? validCoordinates : coordinates;
       const randomIndex = Math.floor(Math.random() * targetPool.length);
       const chosenCoord = targetPool[randomIndex];
-
       const coordIndex = coordinates.findIndex(c => c.row === chosenCoord.row && c.col === chosenCoord.col);
       const coords = coordinates.splice(coordIndex, 1)[0];
-
       placedAll.push(coords);
       card.style.gridRowStart = coords.row;
       card.style.gridColumnStart = coords.col;
@@ -419,7 +416,6 @@ const buildGrid = () => {
   gsapMedia.add("(min-width: 768px)", () => {
     const grids = gsap.utils.toArray(".venue-view-grid");
     gsap.set(grids, { opacity: 0, pointerEvents: "none" });
-
     const tl = gsap.timeline({ repeat: -1 });
     grids.forEach((grid) => {
       tl.to(grid, { opacity: 1, pointerEvents: "auto", duration: 0.35 })

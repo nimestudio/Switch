@@ -1,4 +1,6 @@
-gsap.registerPlugin(ScrollTrigger, SplitText);
+<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // preloader
 const PreloaderAndHero = () => {
@@ -295,15 +297,15 @@ const initMobileSlider = () => {
   if (!sliderElement) return;
 
   const splide = new Splide("#mobile-intro-slider", {
-    type: "loop",
-    speed: 600,
-    rewind: false,
+    type: "fade",
+    rewind: true,
     arrows: false,
     pagination: true,
     autoplay: true,
     interval: 3000,
     pauseOnHover: false,
-    pauseOnFocus: false
+    pauseOnFocus: false,
+    speed: 800
   });
 
   splide.mount();

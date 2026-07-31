@@ -174,16 +174,6 @@ const PreloaderAndHero = () => {
   });
 };
 
-const lenis = new Lenis();
-
-lenis.on("scroll", ScrollTrigger.update);
-
-gsap.ticker.add((time) => {
-  lenis.raf(time * 1000);
-});
-
-gsap.ticker.lagSmoothing(0);
-
 // venues scroll
 const HorizontalScroll = () => {
   const section = document.querySelector(".section-home-intro");
@@ -293,37 +283,33 @@ const HorizontalScroll = () => {
 const initMobileSlider = () => {
   if (window.innerWidth > 991) return;
   
-  const sliderElement = document.querySelector("#mobile-intro-slider");
-  if (!sliderElement) return;
+  const imageSliderElement = document.querySelector("#mobile-image-slider");
+  const textSliderElement = document.querySelector("#mobile-text-slider");
+  
+  if (!imageSliderElement || !textSliderElement) return;
 
-  const splide = new Splide("#mobile-intro-slider", {
+  const imageSlider = new Splide("#mobile-image-slider", {
+    type: "loop",
+    arrows: false,
+    pagination: false,
+    speed: 400,
+    focus: "center",
+    padding: "10%",
+    gap: "1rem"
+  });
+
+  const textSlider = new Splide("#mobile-text-slider", {
     type: "fade",
     rewind: true,
     arrows: false,
-    pagination: true,
-    autoplay: true,
-    interval: 3000,
-    pauseOnHover: false,
-    pauseOnFocus: false,
+    pagination: false,
+    drag: false,
     speed: 800
   });
 
-  splide.mount();
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      const autoplay = splide.Components.Autoplay;
-      if (!autoplay) return;
-      
-      if (entry.isIntersecting) {
-        autoplay.play();
-      } else {
-        autoplay.pause();
-      }
-    });
-  }, { threshold: 0.2 });
-
-  observer.observe(sliderElement);
+  imageSlider.sync(textSlider);
+  imageSlider.mount();
+  textSlider.mount();
 };
 
 // steps
@@ -366,7 +352,7 @@ const HomeSteps = () => {
 };
 
 // cta section reveal
-const HomeCTAReveal = () => {
+const CTAReveal = () => {
   const section = document.querySelector(".section-cta");
   if (!section) return;
 
@@ -434,7 +420,7 @@ const runHomeScripts = () => {
   HorizontalScroll();
   initMobileSlider();
   HomeSteps();
-  HomeCTAReveal();
+  CTAReveal();
   
   if (typeof window.initLineReveal === "function") {
     window.initLineReveal();

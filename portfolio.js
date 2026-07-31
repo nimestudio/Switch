@@ -1,4 +1,4 @@
-  gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // hero text loop
 const initPortfolioLoop = () => {
@@ -12,37 +12,26 @@ const initPortfolioLoop = () => {
 
   const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")].filter(Boolean);
 
-  gsap.set(changingSpan, { display: "inline-block", verticalAlign: "bottom" });
-
   const tl = gsap.timeline({ repeat: -1 });
 
   words.forEach((_, index) => {
     const nextIndex = (index + 1) % words.length;
 
-    tl.to({}, { duration: 2 })
-      .to(changingSpan, {
-        yPercent: -100,
-        duration: 0.3,
-        ease: "power2.in"
-      })
+    tl.to({}, { duration: 0.2 })
       .to(changingSpan, {
         opacity: 0,
-        duration: 0.15,
-        ease: "linear"
-      }, "<")
+        duration: 0.5
+      })
       .call(() => {
         changingSpan.textContent = words[nextIndex];
-      }, null, "+=0.15")
-      .set(changingSpan, { yPercent: 100 })
+      })
       .to(changingSpan, {
-        yPercent: 0,
         opacity: 1,
-        duration: 0.3,
-        ease: "power2.out"
+        duration: 0.5
       });
   });
 };
-
+  
 // page load
 const initPortfolioHeroReveal = () => {
   const lines = document.querySelectorAll(".hero-heading-line");
@@ -445,9 +434,9 @@ const buildGrid = () => {
     gsap.set(grids, { opacity: 0, pointerEvents: "none" });
     const tl = gsap.timeline({ repeat: -1 });
     grids.forEach((grid) => {
-      tl.to(grid, { opacity: 1, pointerEvents: "auto", duration: 0.35 })
-        .to({}, { duration: 2.2 })
-        .to(grid, { opacity: 0, pointerEvents: "none", duration: 0.35 });
+      tl.to(grid, { opacity: 1, pointerEvents: "auto", duration: 0.5 })
+        .to({}, { duration: 1 })
+        .to(grid, { opacity: 0, pointerEvents: "none", duration: 0.5 });
     });
   });
 

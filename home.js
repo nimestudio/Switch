@@ -1,7 +1,5 @@
 <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
-
 // preloader
 const PreloaderAndHero = () => {
   const logo = document.querySelector(".preloader-logo");
@@ -12,9 +10,6 @@ const PreloaderAndHero = () => {
   const navItems = document.querySelectorAll(".nav-container > *");
   const heroSub = document.querySelector(".home-hero-sub p");
   const lines = document.querySelectorAll(".hero-heading-line");
-
-  if (!heroSub || !lines.length) return;
-
   const hasVisited = sessionStorage.getItem("hasVisitedHome");
 
   gsap.set(logo, { y: "101%" });
@@ -31,33 +26,35 @@ const PreloaderAndHero = () => {
   const targetsToAnimate = [];
   const lineGroups = [];
 
-  lines.forEach(line => {
-    const chunks = line.querySelectorAll("[data-hero-reveal='chunk']");
-    const wrappersInLine = [];
+  if (lines.length) {
+    lines.forEach(line => {
+      const chunks = line.querySelectorAll("[data-hero-reveal='chunk']");
+      const wrappersInLine = [];
 
-    chunks.forEach(chunk => {
-      const textContent = chunk.innerHTML;
-      chunk.innerHTML = "";
-      
-      const innerWrapper = document.createElement("span");
-      innerWrapper.style.display = "block";
-      innerWrapper.innerHTML = textContent;
-      
-      chunk.style.clipPath = "inset(0% 0% 0% 0%)";
-      chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
-      
-      chunk.appendChild(innerWrapper);
-      wrappersInLine.push(innerWrapper);
-      targetsToAnimate.push(innerWrapper);
+      chunks.forEach(chunk => {
+        const textContent = chunk.innerHTML;
+        chunk.innerHTML = "";
+        
+        const innerWrapper = document.createElement("span");
+        innerWrapper.style.display = "block";
+        innerWrapper.innerHTML = textContent;
+        
+        chunk.style.clipPath = "inset(0% 0% 0% 0%)";
+        chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
+        
+        chunk.appendChild(innerWrapper);
+        wrappersInLine.push(innerWrapper);
+        targetsToAnimate.push(innerWrapper);
 
-      gsap.set(innerWrapper, { y: "130%" });
-      gsap.set(chunk, { opacity: 1 });
+        gsap.set(innerWrapper, { y: "130%" });
+        gsap.set(chunk, { opacity: 1 });
+      });
+
+      if (wrappersInLine.length) {
+        lineGroups.push(wrappersInLine);
+      }
     });
-
-    if (wrappersInLine.length) {
-      lineGroups.push(wrappersInLine);
-    }
-  });
+  }
 
   const runHeroAnimation = () => {
     const heroTl = gsap.timeline();
@@ -144,17 +141,18 @@ const PreloaderAndHero = () => {
   };
 
   document.fonts.ready.then(() => {
-    split = new SplitText(heroSub, { type: "lines" });
-    split.lines.forEach(l => {
-      const wrapper = document.createElement("div");
-      wrapper.style.overflow = "hidden";
-      wrapper.style.padding = "0.2em 0.05em";
-      wrapper.style.margin = "-0.2em -0.05em";
-      l.parentNode.insertBefore(wrapper, l);
-      wrapper.appendChild(l);
-    });
-
-    gsap.set(split.lines, { y: "120%" });
+    if (heroSub) {
+      split = new SplitText(heroSub, { type: "lines" });
+      split.lines.forEach(l => {
+        const wrapper = document.createElement("div");
+        wrapper.style.overflow = "hidden";
+        wrapper.style.padding = "0.2em 0.05em";
+        wrapper.style.margin = "-0.2em -0.05em";
+        l.parentNode.insertBefore(wrapper, l);
+        wrapper.appendChild(l);
+      });
+      gsap.set(split.lines, { y: "120%" });
+    }
 
     if (hasVisited) {
       gsap.set(".preloader", { display: "none" });
@@ -174,7 +172,67 @@ const PreloaderAndHero = () => {
   });
 };
 
-// venues scroll
+// video play/pause cursor
+const initCustomVideoCursor = () => {
+  const bgVideo = document.querySelector('.hero-bg-video');
+  if (!bgVideo) return;
+
+  const cursor = document.querySelector('.custom-video-cursor');
+  const isPointerDevice = window.matchMedia("(pointer: fine)").matches;
+
+  if (!isPointerDevice || !cursor) return;
+
+  const playIcon = document.querySelector('.video-button-play');
+  const pauseIcon = document.querySelector('.video-button-pause');
+
+  const xTo = gsap.quickTo(cursor, "x", { duration: 1, ease: "power3.out" });
+  const yTo = gsap.quickTo(cursor, "y", { duration: 1, ease: "power3.out" });
+
+  const offsetX = 10;
+  const offsetY = 20;
+
+  window.addEventListener('mousemove', (e) => {
+    xTo(e.clientX + offsetX);
+    yTo(e.clientY + offsetY);
+  });
+
+  bgVideo.addEventListener('mouseenter', (e) => {
+    const targetX = e.clientX + offsetX;
+    const targetY = e.clientY + offsetY;
+
+    gsap.set(cursor, { x: targetX, y: targetY });
+    xTo(targetX);
+    yTo(targetY);
+
+    if (bgVideo.paused) {
+      gsap.set(pauseIcon, { opacity: 0 });
+      gsap.set(playIcon, { opacity: 1 });
+    } else {
+      gsap.set(pauseIcon, { opacity: 1 });
+      gsap.set(playIcon, { opacity: 0 });
+    }
+
+    gsap.to(cursor, { opacity: 1, duration: 0.6, ease: "power2.out" });
+  });
+
+  bgVideo.addEventListener('mouseleave', () => {
+    gsap.to(cursor, { opacity: 0, duration: 0.4, ease: "power2.out" });
+  });
+
+  bgVideo.addEventListener('click', () => {
+    if (bgVideo.paused) {
+      bgVideo.play();
+      gsap.to(pauseIcon, { opacity: 1, duration: 0.2 });
+      gsap.to(playIcon, { opacity: 0, duration: 0.2 });
+    } else {
+      bgVideo.pause();
+      gsap.to(pauseIcon, { opacity: 0, duration: 0.2 });
+      gsap.to(playIcon, { opacity: 1, duration: 0.2 });
+    }
+  });
+};
+
+// venues horizontal scroll desktop only
 const HorizontalScroll = () => {
   const section = document.querySelector(".section-home-intro");
   const track = document.querySelector(".scroll-track");
@@ -279,46 +337,53 @@ const HorizontalScroll = () => {
   });
 };
 
-// venues slider (splide)
+// venues slider mobile
 const initMobileSlider = () => {
-  if (window.innerWidth > 991) return;
-  
   const imageSliderElement = document.querySelector("#mobile-image-slider");
   const textSliderElement = document.querySelector("#mobile-text-slider");
   
   if (!imageSliderElement || !textSliderElement) return;
 
-  const imageSlider = new Splide("#mobile-image-slider", {
-    type: "loop",
-    arrows: false,
-    pagination: false,
-    speed: 400,
-    focus: "center",
-    padding: "10%",
-    gap: "1rem"
-  });
+  const mm = gsap.matchMedia();
 
-  const textSlider = new Splide("#mobile-text-slider", {
-    type: "fade",
-    rewind: true,
-    arrows: false,
-    pagination: false,
-    drag: false,
-    speed: 800
-  });
+  mm.add("(max-width: 991px)", () => {
+    const imageSlider = new Splide("#mobile-image-slider", {
+      type: "loop",
+      arrows: false,
+      pagination: false,
+      speed: 400,
+      focus: "center",
+      padding: "10%",
+      gap: "1rem"
+    });
 
-  imageSlider.sync(textSlider);
-  imageSlider.mount();
-  textSlider.mount();
+    const textSlider = new Splide("#mobile-text-slider", {
+      type: "fade",
+      rewind: true,
+      arrows: false,
+      pagination: false,
+      drag: false,
+      speed: 800
+    });
+
+    imageSlider.sync(textSlider);
+    imageSlider.mount();
+    textSlider.mount();
+
+    return () => {
+      imageSlider.destroy();
+      textSlider.destroy();
+    };
+  });
 };
 
-// steps
+// home steps stagger load
 const HomeSteps = () => {
   const wrapper = document.querySelector(".home-steps-wrap");
   if (!wrapper) return;
 
   const steps = wrapper.querySelectorAll(".home-step");
-  if (steps.length < 5) return;
+  if (!steps.length) return;
 
   gsap.from(steps, {
     opacity: 0,
@@ -344,14 +409,15 @@ const HomeSteps = () => {
       }
     });
 
-    tl.to(steps[0], { yPercent: -40, ease: "none" }, 0)
-      .to(steps[1], { yPercent: -20, ease: "none" }, 0)
-      .to(steps[3], { yPercent: 20, ease: "none" }, 0)
-      .to(steps[4], { yPercent: 40, ease: "none" }, 0);
+    steps.forEach((step, index) => {
+      const middle = (steps.length - 1) / 2;
+      const offset = (index - middle) * 20;
+      tl.to(step, { yPercent: offset, ease: "none" }, 0);
+    });
   });
 };
 
-// cta section reveal
+// CTA section columns animation
 const CTAReveal = () => {
   const section = document.querySelector(".section-cta");
   if (!section) return;
@@ -360,63 +426,67 @@ const CTAReveal = () => {
   const textWrap = document.querySelector(".cta-reveal-text-wrap");
   const button = document.querySelector(".section-cta .button");
 
-  if (columns.length < 5 || !textWrap) return;
+  if (button) {
+    gsap.set(button, { autoAlpha: 0 });
+  }
 
-  const split = new SplitText(textWrap, { type: "lines" });
-  split.lines.forEach(line => {
-    const wrapper = document.createElement("div");
-    wrapper.style.overflow = "hidden";
-    wrapper.style.padding = "0.2em 0.05em";
-    wrapper.style.margin = "-0.2em -0.05em";
-    line.parentNode.insertBefore(wrapper, line);
-    wrapper.appendChild(line);
-  });
-  
-  gsap.set(split.lines, { y: "130%" });
-  gsap.set(button, { autoAlpha: 0 });
+  if (textWrap) {
+    const split = new SplitText(textWrap, { type: "lines" });
+    split.lines.forEach(line => {
+      const wrapper = document.createElement("div");
+      wrapper.style.overflow = "hidden";
+      wrapper.style.padding = "0.2em 0.05em";
+      wrapper.style.margin = "-0.2em -0.05em";
+      line.parentNode.insertBefore(wrapper, line);
+      wrapper.appendChild(line);
+    });
+    
+    gsap.set(split.lines, { y: "130%" });
 
-  gsap.set(columns[0], { height: "0%" });
-  gsap.set(columns[1], { height: "25%" });
-  gsap.set(columns[2], { height: "50%" });
-  gsap.set(columns[3], { height: "75%" });
-  gsap.set(columns[4], { height: "100%" });
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top 25%",
+        once: true
+      }
+    })
+    .to(split.lines, {
+      y: "0%",
+      duration: 1,
+      stagger: 0.3,
+      ease: "power3.out"
+    })
+    .to(button, {
+      autoAlpha: 1,
+      duration: 1.5,
+      ease: "power1.out"
+    }, "-=0.4");
+  }
 
-  gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: "top bottom+=40%",
-      end: "top top-=30%",
-      scrub: true
-    }
-  })
-  .to(columns[4], { height: "0%", ease: "none", duration: 100 }, 0)
-  .to(columns[2], { height: "0%", ease: "none", duration: 100 }, 0)
-  .to(columns[0], { height: "0%", ease: "none", duration: 100 }, 0)
-  .to(columns[1], { height: "0%", ease: "none", duration: 100 }, 0)
-  .to(columns[3], { height: "0%", ease: "none", duration: 100 }, 0);
+  if (columns.length) {
+    columns.forEach((col, index) => {
+      const startHeight = (index / (columns.length - 1)) * 100;
+      gsap.set(col, { height: `${startHeight}%` });
+    });
 
-  gsap.timeline({
-    scrollTrigger: {
-      trigger: section,
-      start: "top 25%",
-      once: true
-    }
-  })
-  .to(split.lines, {
-    y: "0%",
-    duration: 1,
-    stagger: 0.3,
-    ease: "power3.out"
-  })
-  .to(button, {
-    autoAlpha: 1,
-    duration: 1.5,
-    ease: "power1.out"
-  }, "-=0.4");
+    const scrollTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top bottom+=40%",
+        end: "top top-=30%",
+        scrub: true
+      }
+    });
+
+    columns.forEach(col => {
+      scrollTl.to(col, { height: "0%", ease: "none", duration: 100 }, 0);
+    });
+  }
 };
 
 const runHomeScripts = () => {
   PreloaderAndHero();
+  initCustomVideoCursor();
   HorizontalScroll();
   initMobileSlider();
   HomeSteps();
@@ -432,6 +502,8 @@ const checkGsapAndRunHome = () => {
     setTimeout(checkGsapAndRunHome, 50);
     return;
   }
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
   
   if (document.readyState === "complete") {
     runHomeScripts();

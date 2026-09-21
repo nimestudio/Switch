@@ -1,4 +1,4 @@
-gsap.registerPlugin(ScrollTrigger, SplitText);
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // page load
 const initServicesHeroReveal = () => {
@@ -184,8 +184,8 @@ const initServiceNavReveal = () => {
           ease: "none",
           scrollTrigger: {
             trigger: nextBlock,
-            start: "top 60%",
-            end: "top 10%",
+            start: "top 70%",
+            end: "top 30%",
             scrub: true
           }
         });

@@ -1,7 +1,4 @@
-gsap.registerPlugin(ScrollTrigger, SplitText);
-
-// hero text loop
-const initPortfolioLoop = () => {
+ const initPortfolioLoop = () => {
   const changingSpan = document.querySelector(".portfolio-changing-chunk");
   if (!changingSpan || changingSpan.dataset.loopInitialized) return;
   
@@ -18,21 +15,14 @@ const initPortfolioLoop = () => {
     const nextIndex = (index + 1) % words.length;
 
     tl.to({}, { duration: 0.2 })
-      .to(changingSpan, {
-        opacity: 0,
-        duration: 0.5
-      })
+      .to(changingSpan, { opacity: 0, duration: 0.5 })
       .call(() => {
         changingSpan.textContent = words[nextIndex];
       })
-      .to(changingSpan, {
-        opacity: 1,
-        duration: 0.5
-      });
+      .to(changingSpan, { opacity: 1, duration: 0.5 });
   });
 };
   
-// page load
 const initPortfolioHeroReveal = () => {
   const lines = document.querySelectorAll(".hero-heading-line");
   const navbar = document.querySelector(".navbar");
@@ -105,67 +95,30 @@ const initPortfolioHeroReveal = () => {
   if (targetsToAnimate.length) {
     if (window.innerWidth >= 768) {
       lineGroups.forEach((group, index) => {
-        tl.to(group, {
-          y: "0%",
-          duration: 1,
-          ease: "power3.out"
-        }, index * 0.25);
+        tl.to(group, { y: "0%", duration: 1, ease: "power3.out" }, index * 0.25);
       });
     } else {
-      tl.to(targetsToAnimate, {
-        y: "0%",
-        duration: 1,
-        stagger: 0.25,
-        ease: "power3.out"
-      }, 0);
+      tl.to(targetsToAnimate, { y: "0%", duration: 1, stagger: 0.25, ease: "power3.out" }, 0);
     }
   }
 
   if (navbar) {
-    tl.to(navbar, {
-      opacity: 1,
-      duration: 1,
-      ease: "power3.out"
-    }, 0);
+    tl.to(navbar, { opacity: 1, duration: 1, ease: "power3.out" }, 0);
   }
 
   if (navItems.length) {
-    tl.to(navItems, {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      stagger: 0.1,
-      ease: "power3.out"
-    }, 0);
+    tl.to(navItems, { opacity: 1, y: 0, duration: 1, stagger: 0.1, ease: "power3.out" }, 0);
   }
 
   if (subtitle && split) {
     const startOffset = targetsToAnimate.length ? 0.5 : 0;
-    tl.to(split.lines, {
-      y: "0%",
-      opacity: 1,
-      duration: 1.5,
-      stagger: 0.1,
-      ease: "power2.inOut"
-    }, startOffset);
+    tl.to(split.lines, { y: "0%", opacity: 1, duration: 1.5, stagger: 0.1, ease: "power2.inOut" }, startOffset);
   }
 
-  tl.call(initPortfolioLoop, null, "-=2");
-  
+  const offset = Math.min(tl.duration(), 2);
+  tl.call(initPortfolioLoop, null, `-=${offset}`);
 };
 
-// project numbers
-const initOrderNumbers = () => {
-  const numbers = document.querySelectorAll("[data-order='number']");
-  numbers.forEach(el => {
-    const text = el.textContent.trim();
-    if (text && !isNaN(text)) {
-      el.textContent = text.padStart(2, "0");
-    }
-  });
-};
-
-// project item hover
 const initPortfolioAnimation = () => {
   const items = document.querySelectorAll(".project-item");
   const classes = [
@@ -194,12 +147,8 @@ const initPortfolioAnimation = () => {
       const bg = item.querySelector(".project-item-bg");
       const img = item.querySelector(".project-item-img");
 
-      if (bg) {
-        gsap.set(bg, { height: "0rem" });
-      }
-      if (img) {
-        gsap.set(img, { scale: 1 });
-      }
+      if (bg) gsap.set(bg, { height: "0rem" });
+      if (img) gsap.set(img, { scale: 1 });
 
       const onMouseEnter = () => {
         if (bg) gsap.to(bg, { height: "1.5rem", duration: 0.3, ease: "power2.out" });
@@ -230,9 +179,8 @@ const initPortfolioAnimation = () => {
   });
 };
 
-// venues grid slides
 let currentBucket = "";
-let gsapMedia = gsap.matchMedia();
+let gsapMedia;
 
 const getLayoutBucket = () => {
   const w = window.innerWidth;
@@ -426,7 +374,7 @@ const buildGrid = () => {
     });
   });
 
-  gsapMedia.revert();
+  if (gsapMedia) gsapMedia.revert();
   gsapMedia = gsap.matchMedia();
 
   gsapMedia.add("(min-width: 768px)", () => {
@@ -456,14 +404,18 @@ window.addEventListener("resize", () => {
 });
 
 const runPortfolio = () => {
+  gsap.registerPlugin(ScrollTrigger, SplitText);
   initPortfolioHeroReveal();
-  initOrderNumbers();
   initPortfolioAnimation();
   buildGrid();
 };
 
 const checkGsapAndRun = () => {
-  if (typeof window.gsap === "undefined" || typeof window.SplitText === "undefined") {
+  if (
+    typeof window.gsap === "undefined" || 
+    typeof window.SplitText === "undefined" || 
+    typeof window.ScrollTrigger === "undefined"
+  ) {
     setTimeout(checkGsapAndRun, 50);
     return;
   }

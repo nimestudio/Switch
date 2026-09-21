@@ -1,4 +1,4 @@
-const initContactHeroReveal = () => {
+  const initContactHeroReveal = () => {
   const lines = document.querySelectorAll(".hero-heading-line");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");

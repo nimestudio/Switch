@@ -1,4 +1,6 @@
- const initPortfolioLoop = () => {
+// hero loop
+
+const initPortfolioLoop = () => {
   const changingSpan = document.querySelector(".portfolio-changing-chunk");
   if (!changingSpan || changingSpan.dataset.loopInitialized) return;
   

@@ -1,4 +1,4 @@
-  gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // page load
 const initServicesHeroReveal = () => {

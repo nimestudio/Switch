@@ -1,6 +1,5 @@
-<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
-
 // preloader
+
 const PreloaderAndHero = () => {
   const logo = document.querySelector(".preloader-logo");
   const logoWrap = document.querySelector(".preloader-logo-wrap");

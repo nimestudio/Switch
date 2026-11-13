@@ -22,13 +22,14 @@ const initLenis = () => {
       lenis.resize();
     });
   }
-
+  /*
   window.addEventListener("load", () => {
     lenis.resize();
     if (typeof ScrollTrigger !== "undefined") {
       ScrollTrigger.refresh();
     }
   });
+  */
 
   let refreshTimeout;
   const resizeObserver = new ResizeObserver(() => {

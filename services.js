@@ -2,14 +2,11 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // page load
 const initServicesHeroReveal = () => {
-  const lines = document.querySelectorAll(".hero-heading-line");
+  const title = document.querySelector("[data-hero-reveal='title']");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
   const imageReveal = document.querySelector("[data-hero-reveal='image-reveal']");
   const serviceItems = document.querySelectorAll("[data-hero-reveal='service-number']");
-
-  const hasElements = lines.length || navbar || imageReveal || serviceItems.length;
-  if (!hasElements) return;
 
   const tl = gsap.timeline({
     onComplete: () => {
@@ -17,109 +14,54 @@ const initServicesHeroReveal = () => {
     }
   });
 
-  const targetsToAnimate = [];
-  const lineGroups = [];
+  const titleSplit = new SplitText(title, { type: "lines" });
+  titleSplit.lines.forEach(line => {
+    const wrapper = document.createElement("div");
+    wrapper.style.overflow = "hidden";
+    wrapper.style.padding = "0.2em 0em";
+    wrapper.style.margin = "-0.35em 0em";
 
-  if (lines.length) {
-    lines.forEach(line => {
-      const chunks = line.querySelectorAll("[data-hero-reveal='chunk']");
-      const wrappersInLine = [];
+    line.parentNode.insertBefore(wrapper, line);
+    wrapper.appendChild(line);
+  });
 
-      chunks.forEach(chunk => {
-        const textContent = chunk.innerHTML;
-        chunk.innerHTML = "";
-        
-        const innerWrapper = document.createElement("span");
-        innerWrapper.style.display = "block";
-        innerWrapper.innerHTML = textContent;
-        
-        chunk.style.clipPath = "inset(0% 0% 0% 0%)";
-        chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
-        
-        chunk.appendChild(innerWrapper);
-        wrappersInLine.push(innerWrapper);
-        targetsToAnimate.push(innerWrapper);
+  gsap.set(navbar, { opacity: 0 });
+  gsap.set(navItems, { opacity: 0, y: 10 });
+  gsap.set(imageReveal, { scaleY: 1, transformOrigin: "bottom" });
+  gsap.set(serviceItems, { opacity: 0, y: 20 });
+  gsap.set(title, { opacity: 1 });
 
-        gsap.set(innerWrapper, { y: "130%" });
-        gsap.set(chunk, { opacity: 1 });
-      });
-
-      if (wrappersInLine.length) {
-        lineGroups.push(wrappersInLine);
-      }
-    });
-  }
-
-  if (navbar) {
-    gsap.set(navbar, { opacity: 0 });
-  }
-  if (navItems.length) {
-    gsap.set(navItems, { opacity: 0, y: 10 });
-  }
-
-  if (imageReveal) {
-    gsap.set(imageReveal, { scaleY: 1, transformOrigin: "bottom" });
-  }
-
-  if (serviceItems.length) {
-    gsap.set(serviceItems, { opacity: 0, y: 20 });
-  }
-
-  if (targetsToAnimate.length) {
-    if (window.innerWidth >= 768) {
-      lineGroups.forEach((group, index) => {
-        tl.to(group, {
-          y: "0%",
-          duration: 1,
-          ease: "power3.out"
-        }, index * 0.25);
-      });
-    } else {
-      tl.to(targetsToAnimate, {
-        y: "0%",
-        duration: 1,
-        stagger: 0.25,
-        ease: "power3.out"
-      }, 0);
-    }
-  }
-
-  if (navbar) {
-    tl.to(navbar, {
-      opacity: 1,
-      duration: 1,
-      ease: "power3.out"
-    }, 0);
-  }
-
-  if (navItems.length) {
-    tl.to(navItems, {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      stagger: 0.1,
-      ease: "power3.out"
-    }, 0);
-  }
-
-  if (imageReveal) {
-    tl.to(imageReveal, {
-      scaleY: 0,
-      duration: 1,
-      ease: "power3.in"
-    }, 0);
-  }
-
-  if (serviceItems.length) {
-    const position = imageReveal ? "-=0.2" : "-=0.5";
-    tl.to(serviceItems, {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      stagger: 0.15,
-      ease: "power3.out"
-    }, position);
-  }
+  tl.from(titleSplit.lines, {
+    yPercent: 130,
+    opacity: 0,
+    duration: 1,
+    stagger: 0.2,
+    ease: "power3.out"
+  }, 0)
+  .to(navbar, {
+    opacity: 1,
+    duration: 1,
+    ease: "power3.out"
+  }, 0)
+  .to(navItems, {
+    opacity: 1,
+    y: 0,
+    duration: 1,
+    stagger: 0.1,
+    ease: "power3.out"
+  }, 0)
+  .to(imageReveal, {
+    scaleY: 0,
+    duration: 1,
+    ease: "power3.in"
+  }, 0)
+  .to(serviceItems, {
+    opacity: 1,
+    y: 0,
+    duration: 1,
+    stagger: 0.15,
+    ease: "power3.out"
+  }, "-=0.2");
 };
 
 // service nav reveal

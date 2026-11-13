@@ -1,4 +1,7 @@
-// lenis
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 const initLenis = () => {
   if (typeof Lenis === "undefined") return;
 
@@ -22,24 +25,25 @@ const initLenis = () => {
       lenis.resize();
     });
   }
-  
+
   window.addEventListener("load", () => {
     lenis.resize();
     if (typeof ScrollTrigger !== "undefined") {
       ScrollTrigger.refresh();
     }
   });
-  
-let resizeTimeout;
-window.addEventListener("resize", () => {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(() => {
-    lenis.resize();
-    if (typeof ScrollTrigger !== "undefined") {
-      ScrollTrigger.refresh();
-    }
-  }, 250);
-});
+
+  let resizeTimeout;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      lenis.resize();
+      if (typeof ScrollTrigger !== "undefined") {
+        ScrollTrigger.refresh();
+      }
+    }, 250);
+  });
+};
   
 // navbar scroll lock on mobile
 const initNavbarScrollLock = () => {

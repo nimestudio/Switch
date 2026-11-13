@@ -30,21 +30,17 @@ const initLenis = () => {
     }
   });
   
-/*
-  let refreshTimeout;
-  const resizeObserver = new ResizeObserver(() => {
-    clearTimeout(refreshTimeout);
-    refreshTimeout = setTimeout(() => {
-      lenis.resize();
-      if (typeof ScrollTrigger !== "undefined") {
-        ScrollTrigger.refresh();
-      }
-    }, 250);
-  });
-
-  resizeObserver.observe(document.body);
-};
-*/
+let resizeTimeout;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    lenis.resize();
+    if (typeof ScrollTrigger !== "undefined") {
+      ScrollTrigger.refresh();
+    }
+  }, 250);
+});
+  
 // navbar scroll lock on mobile
 const initNavbarScrollLock = () => {
   const menu = document.querySelector(".mobile-nav");

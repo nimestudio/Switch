@@ -1,7 +1,3 @@
-if ('scrollRestoration' in history) {
-  history.scrollRestoration = 'manual';
-}
-
 // lenis
 const initLenis = () => {
   if (typeof Lenis === "undefined") return;

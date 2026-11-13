@@ -246,15 +246,8 @@ const HorizontalScroll = () => {
     let trackWidthPx = 0;
 
     const calculateSizes = () => {
-      let maxRight = 0;
-      
-      items.forEach(item => {
-        const rect = item.getBoundingClientRect();
-        maxRight = Math.max(maxRight, rect.right + window.scrollX);
-      });
-
       const extraSpace = window.innerWidth;
-      trackWidthPx = maxRight + extraSpace;
+      trackWidthPx = track.scrollWidth + extraSpace;
     };
 
     calculateSizes();

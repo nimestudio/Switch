@@ -1,38 +1,29 @@
-// hero loop
-
+// hero title loop
 const initPortfolioLoop = () => {
-  const changingSpan = document.querySelector(".portfolio-changing-chunk");
-  if (!changingSpan || changingSpan.dataset.loopInitialized) return;
+  const spans = document.querySelectorAll(".portfolio-changing-chunk");
+  if (!spans.length) return;
   
-  changingSpan.dataset.loopInitialized = "true";
+  const span = spans[1] || spans[0];
+  if (span.dataset.loopInitialized) return;
+  span.dataset.loopInitialized = "true";
 
-  const wordsAttr = changingSpan.getAttribute("data-words");
-  if (!wordsAttr) return;
-
-  const words = [changingSpan.textContent.trim(), ...wordsAttr.split("-")].filter(Boolean);
-
+  const words = [span.textContent.trim(), ...span.getAttribute("data-words").split("-")].filter(Boolean);
   const tl = gsap.timeline({ repeat: -1 });
 
-  words.forEach((_, index) => {
-    const nextIndex = (index + 1) % words.length;
-
-    tl.to({}, { duration: 0.2 })
-      .to(changingSpan, { opacity: 0, duration: 0.2 })
-      .call(() => {
-        changingSpan.textContent = words[nextIndex];
-      })
-      .to(changingSpan, { opacity: 1, duration: 0.2 });
+  words.forEach((_, idx) => {
+    const next = (idx + 1) % words.length;
+    tl.to(span, { opacity: 0, duration: 0.2, delay: 0.1 })
+      .call(() => span.textContent = words[next])
+      .to(span, { opacity: 1, duration: 0.2 });
   });
 };
-  
+
+// hero load
 const initPortfolioHeroReveal = () => {
   const title = document.querySelector("[data-hero-reveal='title']");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
   const subtitle = document.querySelector("[data-hero-reveal='subtitle']");
-
-  const hasElements = title || navbar || subtitle;
-  if (!hasElements) return;
 
   const tl = gsap.timeline({
     onComplete: () => {
@@ -40,70 +31,58 @@ const initPortfolioHeroReveal = () => {
     }
   });
 
-  let titleSplit;
-  if (title) {
-    titleSplit = new SplitText(title, { type: "lines" });
-    titleSplit.lines.forEach(line => {
-      const wrapper = document.createElement("div");
-      wrapper.style.overflow = "hidden";
-      wrapper.style.padding = "0.2em 0em";
-      wrapper.style.margin = "-0.2em 0em";
-
-      line.parentNode.insertBefore(wrapper, line);
-      wrapper.appendChild(line);
-    });
-  }
-
-  if (navbar) {
-    gsap.set(navbar, { opacity: 0 });
-  }
-  if (navItems.length) {
-    gsap.set(navItems, { opacity: 0, y: 10 });
-  }
-
-  if (subtitle) {
+  const titleSplit = new SplitText(title, { type: "lines" });
+  titleSplit.lines.forEach(line => {
     const wrapper = document.createElement("div");
     wrapper.style.overflow = "hidden";
     wrapper.style.padding = "0.2em 0em";
-    wrapper.style.margin = "-0.2em 0em";
+    wrapper.style.margin = "-0.35em 0em";
 
-    subtitle.parentNode.insertBefore(wrapper, subtitle);
-    wrapper.appendChild(subtitle);
+    line.parentNode.insertBefore(wrapper, line);
+    wrapper.appendChild(line);
+  });
 
-    gsap.set(subtitle, { yPercent: 120, opacity: 0 });
-  }
+  const subtitleWrapper = document.createElement("div");
+  subtitleWrapper.style.overflow = "hidden";
+  subtitle.parentNode.insertBefore(subtitleWrapper, subtitle);
+  subtitleWrapper.appendChild(subtitle);
 
-  if (title && titleSplit) {
-    tl.from(titleSplit.lines, {
-      yPercent: 130,
-      duration: 1,
-      stagger: 0.2,
-      ease: "power3.out"
-    }, 0);
-  }
+  gsap.set(navbar, { opacity: 0 });
+  gsap.set(navItems, { opacity: 0, y: 10 });
+  gsap.set(subtitle, { yPercent: 120 });
+  gsap.set(title, { opacity: 1 });
 
-  if (navbar) {
-    tl.to(navbar, { opacity: 1, duration: 1, ease: "power3.out" }, 0);
-  }
-
-  if (navItems.length) {
-    tl.to(navItems, { opacity: 1, y: 0, duration: 1, stagger: 0.1, ease: "power3.out" }, 0);
-  }
-  
-  if (subtitle) {
-    const startOffset = title ? 0.5 : 0;
-    tl.to(subtitle, {
-      yPercent: 0,
-      opacity: 1,
-      duration: 1.5,
-      ease: "power2.inOut"
-    }, startOffset);
-  }
+  tl.from(titleSplit.lines, {
+    yPercent: 130,
+    opacity: 0,
+    duration: 1,
+    stagger: 0.2,
+    ease: "power3.out"
+  }, 0)
+  .to(navbar, {
+    opacity: 1,
+    duration: 1,
+    ease: "power3.out"
+  }, 0)
+  .to(navItems, {
+    opacity: 1,
+    y: 0,
+    duration: 1,
+    stagger: 0.1,
+    ease: "power3.out"
+  }, 0)
+  .to(subtitle, {
+    yPercent: 0,
+    opacity: 1,
+    duration: 1.5,
+    ease: "power2.inOut"
+  }, 0);
 
   const offset = Math.min(tl.duration(), 2);
   tl.call(initPortfolioLoop, null, `-=${offset}`);
 };
 
+// portfolio venues
 const initPortfolioAnimation = () => {
   const items = document.querySelectorAll(".project-item");
   const classes = [

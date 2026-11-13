@@ -17,21 +17,21 @@ const initPortfolioLoop = () => {
     const nextIndex = (index + 1) % words.length;
 
     tl.to({}, { duration: 0.2 })
-      .to(changingSpan, { opacity: 0, duration: 0.5 })
+      .to(changingSpan, { opacity: 0, duration: 0.2 })
       .call(() => {
         changingSpan.textContent = words[nextIndex];
       })
-      .to(changingSpan, { opacity: 1, duration: 0.5 });
+      .to(changingSpan, { opacity: 1, duration: 0.2 });
   });
 };
   
 const initPortfolioHeroReveal = () => {
-  const lines = document.querySelectorAll(".hero-heading-line");
+  const title = document.querySelector("[data-hero-reveal='title']");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
   const subtitle = document.querySelector("[data-hero-reveal='subtitle']");
 
-  const hasElements = lines.length || navbar || subtitle;
+  const hasElements = title || navbar || subtitle;
   if (!hasElements) return;
 
   const tl = gsap.timeline({
@@ -40,36 +40,17 @@ const initPortfolioHeroReveal = () => {
     }
   });
 
-  const targetsToAnimate = [];
-  const lineGroups = [];
+  let titleSplit;
+  if (title) {
+    titleSplit = new SplitText(title, { type: "lines" });
+    titleSplit.lines.forEach(line => {
+      const wrapper = document.createElement("div");
+      wrapper.style.overflow = "hidden";
+      wrapper.style.padding = "0.2em 0em";
+      wrapper.style.margin = "-0.2em 0em";
 
-  if (lines.length) {
-    lines.forEach(line => {
-      const chunks = line.querySelectorAll("[data-hero-reveal='chunk']");
-      const wrappersInLine = [];
-
-      chunks.forEach(chunk => {
-        const textContent = chunk.innerHTML;
-        chunk.innerHTML = "";
-        
-        const innerWrapper = document.createElement("span");
-        innerWrapper.style.display = "block";
-        innerWrapper.innerHTML = textContent;
-        
-        chunk.style.clipPath = "inset(0% 0% 0% 0%)";
-        chunk.style.webkitClipPath = "inset(0% 0% 0% 0%)";
-        
-        chunk.appendChild(innerWrapper);
-        wrappersInLine.push(innerWrapper);
-        targetsToAnimate.push(innerWrapper);
-
-        gsap.set(innerWrapper, { y: "130%" });
-        gsap.set(chunk, { opacity: 1 });
-      });
-
-      if (wrappersInLine.length) {
-        lineGroups.push(wrappersInLine);
-      }
+      line.parentNode.insertBefore(wrapper, line);
+      wrapper.appendChild(line);
     });
   }
 
@@ -80,28 +61,25 @@ const initPortfolioHeroReveal = () => {
     gsap.set(navItems, { opacity: 0, y: 10 });
   }
 
-  let split;
   if (subtitle) {
-    split = new SplitText(subtitle, { type: "lines" });
-    split.lines.forEach(l => {
-      const wrapper = document.createElement("div");
-      wrapper.style.overflow = "hidden";
-      wrapper.style.padding = "0.2em 0.05em";
-      wrapper.style.margin = "-0.2em -0.05em";
-      l.parentNode.insertBefore(wrapper, l);
-      wrapper.appendChild(l);
-    });
-    gsap.set(split.lines, { y: "120%" });
+    const wrapper = document.createElement("div");
+    wrapper.style.overflow = "hidden";
+    wrapper.style.padding = "0.2em 0em";
+    wrapper.style.margin = "-0.2em 0em";
+
+    subtitle.parentNode.insertBefore(wrapper, subtitle);
+    wrapper.appendChild(subtitle);
+
+    gsap.set(subtitle, { yPercent: 120, opacity: 0 });
   }
 
-  if (targetsToAnimate.length) {
-    if (window.innerWidth >= 768) {
-      lineGroups.forEach((group, index) => {
-        tl.to(group, { y: "0%", duration: 1, ease: "power3.out" }, index * 0.25);
-      });
-    } else {
-      tl.to(targetsToAnimate, { y: "0%", duration: 1, stagger: 0.25, ease: "power3.out" }, 0);
-    }
+  if (title && titleSplit) {
+    tl.from(titleSplit.lines, {
+      yPercent: 130,
+      duration: 1,
+      stagger: 0.2,
+      ease: "power3.out"
+    }, 0);
   }
 
   if (navbar) {
@@ -111,10 +89,15 @@ const initPortfolioHeroReveal = () => {
   if (navItems.length) {
     tl.to(navItems, { opacity: 1, y: 0, duration: 1, stagger: 0.1, ease: "power3.out" }, 0);
   }
-
-  if (subtitle && split) {
-    const startOffset = targetsToAnimate.length ? 0.5 : 0;
-    tl.to(split.lines, { y: "0%", opacity: 1, duration: 1.5, stagger: 0.1, ease: "power2.inOut" }, startOffset);
+  
+  if (subtitle) {
+    const startOffset = title ? 0.5 : 0;
+    tl.to(subtitle, {
+      yPercent: 0,
+      opacity: 1,
+      duration: 1.5,
+      ease: "power2.inOut"
+    }, startOffset);
   }
 
   const offset = Math.min(tl.duration(), 2);

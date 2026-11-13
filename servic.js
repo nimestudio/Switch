@@ -5,6 +5,7 @@ const initServicesHeroReveal = () => {
   const title = document.querySelector("[data-hero-reveal='title']");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
+  const imageReveal = document.querySelector("[data-hero-reveal='image-reveal']");
   const serviceItems = document.querySelectorAll("[data-hero-reveal='service-number']");
 
   const tl = gsap.timeline({
@@ -48,6 +49,11 @@ const initServicesHeroReveal = () => {
     duration: 1,
     stagger: 0.1,
     ease: "power3.out"
+  }, 0)
+  .to(imageReveal, {
+      scaleY: 0,
+      duration: 1,
+      ease: "power3.in"
   }, 0)
   .to(serviceItems, {
     opacity: 1,

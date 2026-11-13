@@ -22,15 +22,15 @@ const initLenis = () => {
       lenis.resize();
     });
   }
-  /*
+  
   window.addEventListener("load", () => {
     lenis.resize();
     if (typeof ScrollTrigger !== "undefined") {
       ScrollTrigger.refresh();
     }
   });
-  */
-
+  
+/*
   let refreshTimeout;
   const resizeObserver = new ResizeObserver(() => {
     clearTimeout(refreshTimeout);
@@ -44,7 +44,7 @@ const initLenis = () => {
 
   resizeObserver.observe(document.body);
 };
-
+*/
 // navbar scroll lock on mobile
 const initNavbarScrollLock = () => {
   const menu = document.querySelector(".mobile-nav");

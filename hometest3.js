@@ -38,8 +38,8 @@ const PreloaderAndHero = () => {
     wrapper.appendChild(line);
   });
 
-  gsap.set(titleSplit.lines, { yPercent: 130, opacity: 0 });
-  gsap.set(subtitleSplit.lines, { yPercent: 120, opacity: 0 });
+  gsap.set(titleSplit.lines, { yPercent: 130 });
+  gsap.set(subtitleSplit.lines, { yPercent: 120 });
 
   const runHeroAnimation = () => {
     const heroTl = gsap.timeline();

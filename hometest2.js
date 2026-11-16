@@ -16,42 +16,41 @@ const PreloaderAndHero = () => {
   gsap.set(navbar, { opacity: 0 });
   gsap.set(navItems, { opacity: 0, y: 10 });
 
-  let titleSplit;
-  if (title) {
-    titleSplit = new SplitText(title, { type: "lines" });
-    titleSplit.lines.forEach(line => {
-      const wrapper = document.createElement("div");
-      wrapper.style.overflow = "hidden";
-      wrapper.style.padding = "0.2em 0em";
-      wrapper.style.margin = "-0.35em 0em";
+  const titleSplit = new SplitText(title, { type: "lines" });
+  titleSplit.lines.forEach(line => {
+    const wrapper = document.createElement("div");
+    wrapper.style.overflow = "hidden";
+    wrapper.style.padding = "0.2em 0em";
+    wrapper.style.margin = "-0.35em 0em";
 
-      line.parentNode.insertBefore(wrapper, line);
-      wrapper.appendChild(line);
-    });
-    gsap.set(title, { opacity: 1 });
-  }
+    line.parentNode.insertBefore(wrapper, line);
+    wrapper.appendChild(line);
+  });
 
-  let subtitleSplit;
-  if (subtitle) {
-    const subtitleWrapper = document.createElement("div");
-    subtitleWrapper.style.overflow = "hidden";
-    subtitle.parentNode.insertBefore(subtitleWrapper, subtitle);
-    subtitleWrapper.appendChild(subtitle);
-    gsap.set(subtitle, { yPercent: 120 });
-  }
+  const subtitleSplit = new SplitText(subtitle, { type: "lines" });
+  subtitleSplit.lines.forEach(line => {
+    const wrapper = document.createElement("div");
+    wrapper.style.overflow = "hidden";
+    wrapper.style.padding = "0.2em 0.05em";
+    wrapper.style.margin = "-0.2em -0.05em";
+
+    line.parentNode.insertBefore(wrapper, line);
+    wrapper.appendChild(line);
+  });
+
+  gsap.set(titleSplit.lines, { yPercent: 130, opacity: 0 });
+  gsap.set(subtitleSplit.lines, { yPercent: 120, opacity: 0 });
 
   const runHeroAnimation = () => {
     const heroTl = gsap.timeline();
 
-    if (title && titleSplit) {
-      heroTl.from(titleSplit.lines, {
-        yPercent: 130,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out"
-      }, 0);
-    }
+    heroTl.to(titleSplit.lines, {
+      yPercent: 0,
+      opacity: 1,
+      duration: 1,
+      stagger: 0.2,
+      ease: "power3.out"
+    }, 0);
 
     if (navbar) {
       heroTl.to(navbar, {
@@ -71,15 +70,13 @@ const PreloaderAndHero = () => {
       }, 0);
     }
 
-    if (subtitle) {
-      const startOffset = title ? 0.5 : 0;
-      heroTl.to(subtitle, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 1.5,
-        ease: "power2.inOut"
-      }, startOffset);
-    }
+    heroTl.to(subtitleSplit.lines, {
+      yPercent: 0,
+      opacity: 1,
+      duration: 1.5,
+      stagger: 0.1,
+      ease: "power2.inOut"
+    }, 0.5);
   };
 
   const startColumnsAnimation = () => {

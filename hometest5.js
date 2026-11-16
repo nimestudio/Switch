@@ -31,8 +31,8 @@ const PreloaderAndHero = () => {
   subtitleSplit.lines.forEach(line => {
     const wrapper = document.createElement("div");
     wrapper.style.overflow = "hidden";
-    wrapper.style.padding = "0.2em 0.05em";
-    wrapper.style.margin = "-0.2em -0.05em";
+    wrapper.style.padding = "0.2em 0em";
+    wrapper.style.margin = "-0.2em 0em";
 
     line.parentNode.insertBefore(wrapper, line);
     wrapper.appendChild(line);
@@ -77,7 +77,7 @@ const PreloaderAndHero = () => {
       duration: 1.5,
       stagger: 0.1,
       ease: "power2.inOut"
-    }, 0.5);
+    }, 0.25);
   };
 
   const startColumnsAnimation = () => {

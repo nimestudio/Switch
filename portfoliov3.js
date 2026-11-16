@@ -23,7 +23,6 @@ const initPortfolioHeroReveal = () => {
   const title = document.querySelector("[data-hero-reveal='title']");
   const navbar = document.querySelector(".navbar");
   const navItems = document.querySelectorAll(".nav-container > *");
-  const subtitle = document.querySelector("[data-hero-reveal='subtitle']");
 
   const tl = gsap.timeline({
     onComplete: () => {
@@ -42,14 +41,8 @@ const initPortfolioHeroReveal = () => {
     wrapper.appendChild(line);
   });
 
-  const subtitleWrapper = document.createElement("div");
-  subtitleWrapper.style.overflow = "hidden";
-  subtitle.parentNode.insertBefore(subtitleWrapper, subtitle);
-  subtitleWrapper.appendChild(subtitle);
-
   gsap.set(navbar, { opacity: 0 });
   gsap.set(navItems, { opacity: 0, y: 10 });
-  gsap.set(subtitle, { yPercent: 120 });
   gsap.set(title, { opacity: 1 });
 
   tl.from(titleSplit.lines, {
@@ -70,12 +63,6 @@ const initPortfolioHeroReveal = () => {
     duration: 1,
     stagger: 0.1,
     ease: "power3.out"
-  }, 0)
-  .to(subtitle, {
-    yPercent: 0,
-    opacity: 1,
-    duration: 1.5,
-    ease: "power2.inOut"
   }, 0);
 
   const offset = Math.min(tl.duration(), 2);

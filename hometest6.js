@@ -32,7 +32,7 @@ const PreloaderAndHero = () => {
     const wrapper = document.createElement("div");
     wrapper.style.overflow = "hidden";
     wrapper.style.padding = "0.2em 0em";
-    wrapper.style.margin = "-0.2em 0em";
+    wrapper.style.margin = "-0.35em 0em";
 
     line.parentNode.insertBefore(wrapper, line);
     wrapper.appendChild(line);
